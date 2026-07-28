@@ -1,0 +1,8 @@
+PASSOS:
+1. Revogue imediatamente a Secret key que apareceu na captura de tela.
+2. Abra supabase-config.js.
+3. Use a Project URL sem /rest/v1/.
+4. Cole somente a Publishable key.
+5. Execute SQL_PATCH.sql.
+6. Abra index.html com Live Server.
+7. Pressione Ctrl + Shift + R.

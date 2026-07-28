@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Débora Gomes Beauty</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div id="toast-container" class="toast-container"></div>
+
+  <section id="loading-screen" class="loading-screen">
+    <div class="loading-logo">DG</div>
+    <div class="loader"></div>
+    <p id="loading-message">Carregando seu espaço de beleza...</p>
+  </section>
+
+  <main id="auth-screen" class="auth-screen hidden">
+    <section class="auth-brand">
+      <div class="brand-content">
+        <div class="brand-monogram">DG</div>
+        <p class="brand-subtitle">Beauty Experience</p>
+        <h1>Sua beleza.<br>Seu momento.</h1>
+        <p class="brand-description">Agende seus procedimentos com praticidade, segurança e exclusividade.</p>
+      </div>
+    </section>
+
+    <section class="auth-area">
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button id="tab-login" class="auth-tab active" type="button">Entrar</button>
+          <button id="tab-register" class="auth-tab" type="button">Criar conta</button>
+        </div>
+
+        <form id="login-form" class="auth-form">
+          <div class="form-heading">
+            <span>Bem-vinda</span>
+            <h2>Acesse sua conta</h2>
+          </div>
+
+          <label class="form-field">
+            <span>E-mail</span>
+            <input id="login-email" type="email" required>
+          </label>
+
+          <label class="form-field">
+            <span>Senha</span>
+            <div class="password-field">
+              <input id="login-password" type="password" minlength="6" required>
+              <button class="password-toggle" data-target="login-password" type="button">Mostrar</button>
+            </div>
+          </label>
+
+          <button id="login-submit" class="primary-button" type="submit">Entrar</button>
+          <button id="forgot-password-button" class="link-button" type="button">Esqueci minha senha</button>
+        </form>
+
+        <form id="register-form" class="auth-form hidden">
+          <div class="form-heading">
+            <span>Primeiro acesso</span>
+            <h2>Crie sua conta</h2>
+          </div>
+
+          <label class="form-field">
+            <span>Nome completo</span>
+            <input id="register-name" type="text" minlength="3" required>
+          </label>
+
+          <label class="form-field">
+            <span>Telefone</span>
+            <input id="register-phone" type="tel" maxlength="15" placeholder="(91) 99999-9999" required>
+          </label>
+
+          <label class="form-field">
+            <span>E-mail</span>
+            <input id="register-email" type="email" required>
+          </label>
+
+          <label class="form-field">
+            <span>Senha</span>
+            <div class="password-field">
+              <input id="register-password" type="password" minlength="6" required>
+              <button class="password-toggle" data-target="register-password" type="button">Mostrar</button>
+            </div>
+          </label>
+
+          <button id="register-submit" class="primary-button" type="submit">Criar minha conta</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <main id="app-screen" class="app-screen hidden">
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo">DG</div>
+        <div><strong>Débora Gomes</strong><span>Beauty</span></div>
+      </div>
+
+      <nav id="admin-menu" class="sidebar-menu hidden">
+        <button class="menu-item active" data-page="dashboard" type="button">⌂ Visão geral</button>
+        <button class="menu-item" data-page="services" type="button">✦ Serviços</button>
+        <button class="menu-item" data-page="clients" type="button">♡ Clientes</button>
+        <button class="menu-item" data-page="appointments" type="button">▣ Agenda</button>
+      </nav>
+
+      <nav id="client-menu" class="sidebar-menu hidden">
+        <button class="menu-item active" data-page="client-home" type="button">⌂ Início</button>
+        <button class="menu-item" data-page="client-services" type="button">✦ Serviços</button>
+        <button class="menu-item" data-page="client-appointments" type="button">▣ Meus agendamentos</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div id="sidebar-avatar" class="user-avatar">DG</div>
+          <div><strong id="sidebar-user-name">Usuário</strong><span id="sidebar-user-role">Cliente</span></div>
+        </div>
+        <button id="logout-button" class="logout-button" type="button">Sair da conta</button>
+      </div>
+    </aside>
+
+    <button
+      id="sidebar-overlay"
+      class="sidebar-overlay"
+      type="button"
+      aria-label="Fechar menu"
+    ></button>
+
+    <section class="app-content">
+      <header class="topbar">
+        <button id="menu-toggle" class="menu-toggle" type="button" aria-label="Abrir menu">
+          <span></span><span></span><span></span>
+        </button>
+
+        <div class="topbar-brand">
+          <span id="page-eyebrow">Débora Gomes Beauty</span>
+          <h1 id="page-title">Visão geral</h1>
+        </div>
+
+        <button class="topbar-profile" type="button" aria-label="Perfil">
+          <div id="topbar-avatar" class="user-avatar">DG</div>
+          <div class="topbar-profile-copy">
+            <strong id="topbar-user-name">Usuário</strong>
+            <span id="topbar-user-email"></span>
+          </div>
+        </button>
+      </header>
+
+      <section id="page-dashboard" class="page">
+        <div class="welcome-banner">
+          <div><span>Olá,</span><h2 id="welcome-name">Débora</h2><p>Acompanhe os principais dados do seu negócio.</p></div>
+          <div class="welcome-monogram">DG</div>
+        </div>
+
+        <div class="stats-grid">
+          <article class="stat-card"><span>Serviços ativos</span><strong id="dashboard-services-count">0</strong><small>Disponíveis para agendamento</small></article>
+          <article class="stat-card"><span>Clientes cadastradas</span><strong id="dashboard-clients-count">0</strong><small>Contas vinculadas</small></article>
+          <article class="stat-card"><span>Agendamentos</span><strong id="dashboard-appointments-count">0</strong><small>Total registrado</small></article>
+          <article class="stat-card"><span>Receita confirmada</span><strong id="dashboard-revenue">R$ 0,00</strong><small>Pagamentos recebidos</small></article>
+        </div>
+
+        <section class="content-card">
+          <div class="section-heading"><div><span>Catálogo</span><h2>Serviços cadastrados</h2></div></div>
+          <div id="dashboard-services-list" class="services-grid"></div>
+        </section>
+      </section>
+
+      <section id="page-services" class="page hidden">
+        <div class="page-header"><span>Administração</span><h2>Serviços</h2><p>Serviços cadastrados no Supabase.</p></div>
+        <div id="admin-services-list" class="services-grid"></div>
+      </section>
+
+      <section id="page-clients" class="page hidden">
+        <div class="page-header"><span>Relacionamento</span><h2>Clientes</h2><p>Pessoas cadastradas na plataforma.</p></div>
+        <section class="content-card"><div id="clients-list" class="table-wrapper"></div></section>
+      </section>
+
+      <section id="page-appointments" class="page hidden">
+        <div class="empty-state"><div>▣</div><h3>Agenda preparada</h3><p>A agenda real será conectada na próxima etapa.</p></div>
+      </section>
+
+      <section id="page-client-home" class="page hidden">
+        <div class="welcome-banner">
+          <div><span>Bem-vinda,</span><h2 id="client-welcome-name">Cliente</h2><p>Escolha seu procedimento.</p></div>
+          <div class="welcome-monogram">DG</div>
+        </div>
+        <section class="content-card section-gap">
+          <div class="section-heading"><div><span>Escolha seu momento</span><h2>Nossos serviços</h2></div></div>
+          <div id="client-home-services" class="services-grid"></div>
+        </section>
+      </section>
+
+      <section id="page-client-services" class="page hidden">
+        <div class="page-header"><span>Procedimentos</span><h2>Serviços disponíveis</h2><p>Consulte preços, duração e sinal.</p></div>
+        <div id="client-services-list" class="services-grid"></div>
+      </section>
+
+      <section id="page-client-appointments" class="page hidden">
+        <div class="empty-state"><div>♡</div><h3>Nenhum agendamento</h3><p>Em breve você poderá selecionar data e horário.</p></div>
+      </section>
+    </section>
+
+
+    <nav id="mobile-admin-menu" class="mobile-bottom-nav hidden" aria-label="Navegação administrativa">
+      <button class="mobile-nav-item active" data-page="dashboard" type="button">
+        <span class="mobile-nav-icon">⌂</span>
+        <span>Início</span>
+      </button>
+
+      <button class="mobile-nav-item" data-page="services" type="button">
+        <span class="mobile-nav-icon">✦</span>
+        <span>Serviços</span>
+      </button>
+
+      <button class="mobile-nav-item" data-page="clients" type="button">
+        <span class="mobile-nav-icon">♡</span>
+        <span>Clientes</span>
+      </button>
+
+      <button class="mobile-nav-item" data-page="appointments" type="button">
+        <span class="mobile-nav-icon">▣</span>
+        <span>Agenda</span>
+      </button>
+    </nav>
+
+    <nav id="mobile-client-menu" class="mobile-bottom-nav hidden" aria-label="Navegação da cliente">
+      <button class="mobile-nav-item active" data-page="client-home" type="button">
+        <span class="mobile-nav-icon">⌂</span>
+        <span>Início</span>
+      </button>
+
+      <button class="mobile-nav-item" data-page="client-services" type="button">
+        <span class="mobile-nav-icon">✦</span>
+        <span>Serviços</span>
+      </button>
+
+      <button class="mobile-nav-item" data-page="client-appointments" type="button">
+        <span class="mobile-nav-icon">▣</span>
+        <span>Agenda</span>
+      </button>
+
+      <button id="mobile-profile-button" class="mobile-nav-item" type="button">
+        <span class="mobile-nav-icon">◎</span>
+        <span>Perfil</span>
+      </button>
+    </nav>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase-config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
