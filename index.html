@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f8e7eb" />
+  <meta name="description" content="Débora Gomes Beauty — Agendamento online" />
+  <title>Débora Gomes Beauty</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="toast-root" class="toast-root"></div>
+
+  <section id="splash" class="splash">
+    <div class="brand-orb">DG</div>
+    <div class="splash-loader"></div>
+    <p>Preparando sua experiência...</p>
+  </section>
+
+  <!-- ======================================================
+       ÁREA PÚBLICA — CLIENTE NÃO PRECISA DE CONTA
+       ====================================================== -->
+  <main id="public-view" class="public-view hidden">
+    <header class="public-header">
+      <div class="public-brand">
+        <div class="brand-orb">DG</div>
+        <div>
+          <strong>Débora Gomes</strong>
+          <span>Beauty</span>
+        </div>
+      </div>
+
+      <div class="public-header-actions">
+        <button id="professional-area-btn" class="professional-link desktop-only" type="button">
+          Área profissional
+        </button>
+
+        <button
+          id="public-menu-btn"
+          class="public-menu-btn"
+          type="button"
+          aria-label="Abrir menu"
+          aria-expanded="false"
+          aria-controls="public-mobile-menu"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </header>
+
+    <div id="public-menu-overlay" class="public-menu-overlay"></div>
+
+    <aside id="public-mobile-menu" class="public-mobile-menu" aria-hidden="true">
+      <div class="public-mobile-menu-head">
+        <div class="public-brand">
+          <div class="brand-orb">DG</div>
+          <div>
+            <strong>Débora Gomes</strong>
+            <span>Beauty</span>
+          </div>
+        </div>
+
+        <button id="public-menu-close" class="public-menu-close" type="button" aria-label="Fechar menu">
+          ×
+        </button>
+      </div>
+
+      <div class="public-mobile-menu-body">
+        <button class="public-menu-link active" data-public-nav="booking" type="button">
+          <span>✦</span>
+          <div>
+            <strong>Agendar agora</strong>
+            <small>Escolha serviço, data e horário</small>
+          </div>
+        </button>
+
+        <button class="public-menu-link" data-public-nav="services" type="button">
+          <span>♡</span>
+          <div>
+            <strong>Serviços</strong>
+            <small>Veja os procedimentos disponíveis</small>
+          </div>
+        </button>
+
+        <button class="public-menu-link" id="professional-area-mobile-btn" type="button">
+          <span>⌂</span>
+          <div>
+            <strong>Área profissional</strong>
+            <small>Acesso exclusivo da Débora</small>
+          </div>
+        </button>
+      </div>
+
+      <div class="public-mobile-menu-footer">
+        <span>Débora Gomes Beauty</span>
+        <small>Agendamento online • Belém, Pará</small>
+      </div>
+    </aside>
+
+    <section class="public-hero">
+      <div class="public-hero-copy">
+        <span class="eyebrow">DÉBORA GOMES BEAUTY</span>
+        <h1>Seu momento de beleza começa aqui.</h1>
+        <p>
+          Escolha o procedimento, encontre o melhor horário e confirme
+          seu agendamento pelo Pix.
+        </p>
+
+        <div class="public-benefits">
+          <span>✦ Agenda online</span>
+          <span>♡ Atendimento premium</span>
+          <span>▣ Confirmação rápida</span>
+        </div>
+      </div>
+
+      <div class="public-hero-mark">DG</div>
+    </section>
+
+    <section id="booking-area" class="booking-flow-card">
+      <div class="flow-progress">
+        <div class="flow-step active" data-progress="1"><span>1</span><small>Serviço</small></div>
+        <div class="flow-line"></div>
+        <div class="flow-step" data-progress="2"><span>2</span><small>Horário</small></div>
+        <div class="flow-line"></div>
+        <div class="flow-step" data-progress="3"><span>3</span><small>Dados</small></div>
+        <div class="flow-line"></div>
+        <div class="flow-step" data-progress="4"><span>4</span><small>Pix</small></div>
+      </div>
+
+      <!-- ETAPA 1 -->
+      <section id="public-step-1" class="public-step">
+        <header class="step-heading">
+          <span class="eyebrow">Escolha seu procedimento</span>
+          <h2>O que você deseja fazer?</h2>
+          <p>Selecione um serviço para ver os horários disponíveis.</p>
+        </header>
+
+        <div id="public-services-grid" class="service-grid public-service-grid"></div>
+      </section>
+
+      <!-- ETAPA 2 -->
+      <section id="public-step-2" class="public-step hidden">
+        <header class="step-heading split">
+          <div>
+            <span class="eyebrow">Data e horário</span>
+            <h2>Escolha seu melhor momento</h2>
+            <p id="selected-service-caption">Serviço selecionado</p>
+          </div>
+
+          <button class="btn btn-soft" data-back-step="1" type="button">Trocar serviço</button>
+        </header>
+
+        <div class="date-picker-card">
+          <label class="field">
+            <span>Data</span>
+            <input id="public-booking-date" class="control" type="date" />
+          </label>
+        </div>
+
+        <section class="slot-card">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">Horários disponíveis</span>
+              <h3 id="public-slot-date-label">Selecione uma data</h3>
+            </div>
+          </div>
+
+          <div id="public-booking-slots" class="slot-grid">
+            <div class="slots-message">Escolha uma data para consultar.</div>
+          </div>
+        </section>
+
+        <div class="step-actions">
+          <button id="to-customer-data-btn" class="btn btn-primary" type="button" disabled>
+            Continuar
+          </button>
+        </div>
+      </section>
+
+      <!-- ETAPA 3 -->
+      <section id="public-step-3" class="public-step hidden">
+        <header class="step-heading split">
+          <div>
+            <span class="eyebrow">Dados rápidos</span>
+            <h2>Como podemos identificar você?</h2>
+            <p>Não precisa criar conta. Usaremos estes dados somente para o agendamento.</p>
+          </div>
+
+          <button class="btn btn-soft" data-back-step="2" type="button">Voltar</button>
+        </header>
+
+        <div class="guest-form-grid">
+          <label class="field">
+            <span>Nome completo</span>
+            <input id="guest-name" type="text" autocomplete="name" placeholder="Seu nome" />
+          </label>
+
+          <label class="field">
+            <span>WhatsApp</span>
+            <input id="guest-phone" type="tel" autocomplete="tel" maxlength="15" placeholder="(91) 99999-9999" />
+          </label>
+
+          <label class="field">
+            <span>CPF</span>
+            <input id="guest-cpf" type="text" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00" />
+          </label>
+
+          <label class="field">
+            <span>E-mail <small>(opcional)</small></span>
+            <input id="guest-email" type="email" autocomplete="email" placeholder="voce@email.com" />
+          </label>
+
+          <label class="field">
+            <span>Observação <small>(opcional)</small></span>
+            <input id="guest-notes" type="text" maxlength="200" placeholder="Alguma informação importante?" />
+          </label>
+        </div>
+
+        <section class="review-card">
+          <div>
+            <span>Serviço</span>
+            <strong id="review-service">—</strong>
+          </div>
+          <div>
+            <span>Data e horário</span>
+            <strong id="review-datetime">—</strong>
+          </div>
+          <div>
+            <span>Valor total</span>
+            <strong id="review-total">—</strong>
+          </div>
+          <div class="review-highlight">
+            <span>Sinal para confirmar</span>
+            <strong id="review-deposit">—</strong>
+          </div>
+        </section>
+
+        <div class="step-actions">
+          <button id="reserve-and-pay-btn" class="btn btn-primary" type="button">
+            Reservar horário e gerar Pix
+          </button>
+        </div>
+      </section>
+
+      <!-- ETAPA 4 -->
+      <section id="public-step-4" class="public-step hidden">
+        <header class="step-heading center">
+          <span class="eyebrow">Pagamento do sinal</span>
+          <h2>Finalize pelo Pix</h2>
+          <p>
+            Seu horário está temporariamente reservado enquanto aguardamos o pagamento.
+          </p>
+        </header>
+
+        <div class="pix-checkout">
+          <div class="pix-qr-wrap">
+            <img id="pix-qr-image" alt="QR Code Pix" />
+          </div>
+
+          <div class="pix-side">
+            <div class="pix-value-card">
+              <span>Valor do sinal</span>
+              <strong id="pix-value">R$ 0,00</strong>
+              <small id="pix-expiration-label">Aguardando pagamento</small>
+            </div>
+
+            <label class="field">
+              <span>Pix Copia e Cola</span>
+              <textarea id="pix-payload" class="control textarea" readonly></textarea>
+            </label>
+
+            <button id="copy-pix-btn" class="btn btn-primary" type="button">
+              Copiar código Pix
+            </button>
+
+            <div id="payment-status-box" class="payment-status pending">
+              <span class="status-dot"></span>
+              <div>
+                <strong>Aguardando pagamento</strong>
+                <small>A confirmação é automática.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ETAPA FINAL -->
+      <section id="public-step-success" class="public-step hidden">
+        <div class="success-state">
+          <div class="success-icon">✓</div>
+          <span class="eyebrow">Pagamento confirmado</span>
+          <h2>Seu horário está confirmado ✨</h2>
+          <p id="success-message">Seu agendamento foi confirmado com sucesso.</p>
+
+          <div class="confirmation-card">
+            <div><span>Código</span><strong id="success-reference">—</strong></div>
+            <div><span>Serviço</span><strong id="success-service">—</strong></div>
+            <div><span>Data</span><strong id="success-datetime">—</strong></div>
+          </div>
+
+          <button id="new-public-booking-btn" class="btn btn-primary" type="button">
+            Fazer outro agendamento
+          </button>
+        </div>
+      </section>
+    </section>
+
+    <footer class="public-footer">
+      <span>Débora Gomes Beauty</span>
+      <small>Agendamento online • Belém, Pará</small>
+    </footer>
+  </main>
+
+  <!-- ======================================================
+       ÁREA ADMINISTRATIVA
+       ====================================================== -->
+  <main id="app-view" class="app-view hidden">
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-orb">DG</div>
+        <div>
+          <strong>Débora Gomes</strong>
+          <span>Beauty</span>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <button class="nav-item active" data-page="dashboard" type="button"><span>⌂</span>Início</button>
+        <button class="nav-item" data-page="agenda" type="button"><span>▣</span>Agenda</button>
+        <button class="nav-item" data-page="clients" type="button"><span>♡</span>Clientes</button>
+        <button class="nav-item" data-page="services" type="button"><span>✦</span>Serviços</button>
+        <button class="nav-item" data-page="finance" type="button"><span>R$</span>Financeiro</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="profile-chip">
+          <div id="sidebar-avatar" class="avatar">DG</div>
+          <div>
+            <strong id="sidebar-name">Débora</strong>
+            <span>Proprietária</span>
+          </div>
+        </div>
+        <button id="logout-btn" class="btn btn-soft" type="button">Sair</button>
+      </div>
+    </aside>
+
+    <button id="sidebar-overlay" class="sidebar-overlay" type="button"></button>
+
+    <section class="content-shell">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="menu-btn" class="icon-btn menu-btn" type="button">
+            <span></span><span></span><span></span>
+          </button>
+
+          <div>
+            <span class="eyebrow">DÉBORA GOMES BEAUTY</span>
+            <h1 id="page-title">Visão geral</h1>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div id="topbar-avatar" class="avatar">DG</div>
+        </div>
+      </header>
+
+      <section id="page-dashboard" class="page">
+        <header class="page-intro">
+          <span class="eyebrow">Painel administrativo</span>
+          <h2>Seu negócio, em um só lugar.</h2>
+          <p>Agenda, clientes e faturamento em uma visão rápida.</p>
+        </header>
+
+        <div class="stats-grid">
+          <article class="stat-card rose">
+            <div class="stat-icon">▣</div>
+            <span>Agendamentos</span>
+            <strong id="metric-bookings">0</strong>
+            <small>Total registrado</small>
+          </article>
+
+          <article class="stat-card cream">
+            <div class="stat-icon">♡</div>
+            <span>Clientes</span>
+            <strong id="metric-clients">0</strong>
+            <small>Clientes identificadas</small>
+          </article>
+
+          <article class="stat-card white">
+            <div class="stat-icon">✦</div>
+            <span>Serviços</span>
+            <strong id="metric-services">0</strong>
+            <small>Ativos</small>
+          </article>
+
+          <article class="stat-card dark">
+            <div class="stat-icon">R$</div>
+            <span>Receita confirmada</span>
+            <strong id="metric-revenue">R$ 0,00</strong>
+            <small>Pagamentos recebidos</small>
+          </article>
+        </div>
+
+        <section class="panel-card">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">Próximos horários</span>
+              <h3>Agenda</h3>
+            </div>
+          </div>
+          <div id="dashboard-bookings" class="booking-list compact"></div>
+        </section>
+      </section>
+
+      <section id="page-agenda" class="page hidden">
+        <header class="page-intro split">
+          <div>
+            <span class="eyebrow">Organização</span>
+            <h2>Agenda</h2>
+            <p>Todos os agendamentos realizados pelo link público.</p>
+          </div>
+          <div class="filter-row">
+            <input id="agenda-date-filter" class="control" type="date" />
+            <select id="agenda-status-filter" class="control">
+              <option value="all">Todos os status</option>
+              <option value="pending">Aguardando Pix</option>
+              <option value="confirmed">Confirmado</option>
+              <option value="completed">Concluído</option>
+              <option value="cancelled">Cancelado</option>
+            </select>
+          </div>
+        </header>
+
+        <section class="panel-card">
+          <div id="admin-bookings" class="booking-list"></div>
+        </section>
+      </section>
+
+      <section id="page-clients" class="page hidden">
+        <header class="page-intro">
+          <span class="eyebrow">CRM</span>
+          <h2>Clientes</h2>
+          <p>As clientes são identificadas automaticamente pelo WhatsApp.</p>
+        </header>
+
+        <section class="panel-card">
+          <div id="clients-table" class="table-wrap"></div>
+        </section>
+      </section>
+
+      <section id="page-services" class="page hidden">
+        <header class="page-intro">
+          <span class="eyebrow">Catálogo</span>
+          <h2>Serviços</h2>
+          <p>Serviços disponíveis no agendamento público.</p>
+        </header>
+
+        <div id="admin-services-grid" class="service-grid"></div>
+      </section>
+
+      <section id="page-finance" class="page hidden">
+        <header class="page-intro">
+          <span class="eyebrow">Financeiro</span>
+          <h2>Pagamentos</h2>
+          <p>Acompanhe sinais pagos e cobranças pendentes.</p>
+        </header>
+
+        <div class="stats-grid finance-stats">
+          <article class="stat-card white"><span>Recebido</span><strong id="finance-received">R$ 0,00</strong><small>Pix confirmados</small></article>
+          <article class="stat-card cream"><span>Pendente</span><strong id="finance-pending">R$ 0,00</strong><small>Aguardando pagamento</small></article>
+        </div>
+
+        <section class="panel-card">
+          <div id="payments-table" class="table-wrap"></div>
+        </section>
+      </section>
+    </section>
+
+    <nav id="mobile-admin-nav" class="mobile-nav">
+      <button class="mobile-nav-item active" data-page="dashboard" type="button"><span>⌂</span><small>Início</small></button>
+      <button class="mobile-nav-item" data-page="agenda" type="button"><span>▣</span><small>Agenda</small></button>
+      <button class="mobile-nav-item" data-page="clients" type="button"><span>♡</span><small>Clientes</small></button>
+      <button class="mobile-nav-item" data-page="services" type="button"><span>✦</span><small>Serviços</small></button>
+    </nav>
+  </main>
+
+  <!-- LOGIN EXCLUSIVO DA DÉBORA -->
+  <div id="admin-login-modal" class="modal-backdrop hidden">
+    <section class="modal-card small">
+      <header class="modal-head">
+        <div>
+          <span class="eyebrow">Área profissional</span>
+          <h2>Acesso administrativo</h2>
+        </div>
+        <button id="close-admin-login" class="icon-btn" type="button">×</button>
+      </header>
+
+      <form id="admin-login-form" class="admin-login-form">
+        <label class="field">
+          <span>E-mail</span>
+          <input id="admin-email" type="email" autocomplete="email" required />
+        </label>
+
+        <label class="field">
+          <span>Senha</span>
+          <input id="admin-password" type="password" autocomplete="current-password" required />
+        </label>
+
+        <button id="admin-login-submit" class="btn btn-primary" type="submit">Entrar no painel</button>
+      </form>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase-config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
