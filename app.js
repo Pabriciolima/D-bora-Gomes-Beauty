@@ -327,6 +327,21 @@ async function loadPublicSlots() {
       ${timeOf(new Date(row.slot_start))}
     </button>
   `).join("");
+
+  requestAnimationFrame(() => {
+    const step2 = $("#public-step-2");
+    if (step2 && !step2.classList.contains("hidden")) {
+      const slotCard = step2.querySelector(".slot-card");
+      if (slotCard) {
+        const headerOffset = window.innerWidth <= 900 ? 82 : 24;
+        const top = slotCard.getBoundingClientRect().top + window.scrollY - headerOffset;
+        window.scrollTo({
+          top: Math.max(top, 0),
+          behavior: "smooth"
+        });
+      }
+    }
+  });
 }
 
 function selectPublicSlot(btn) {
@@ -335,6 +350,18 @@ function selectPublicSlot(btn) {
   state.selectedSlot = btn.dataset.slot;
   el.toCustomerDataBtn.disabled = false;
   updateReview();
+
+  requestAnimationFrame(() => {
+    const actions = $("#public-step-2 .step-actions");
+    if (actions) {
+      const headerOffset = window.innerWidth <= 900 ? 82 : 24;
+      const top = actions.getBoundingClientRect().top + window.scrollY - window.innerHeight + 120;
+      window.scrollTo({
+        top: Math.max(top, 0),
+        behavior: "smooth"
+      });
+    }
+  });
 }
 
 function updateReview() {
@@ -497,16 +524,59 @@ function goPublicStep(step) {
   $$(".public-step").forEach(section => section.classList.add("hidden"));
 
   if (step === "success") {
-    $("#public-step-success").classList.remove("hidden");
+    const successSection = $("#public-step-success");
+    successSection.classList.remove("hidden");
     updateProgress(4);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    requestAnimationFrame(() => {
+      focusBookingStep(successSection);
+    });
+
     return;
   }
 
-  $(`#public-step-${step}`).classList.remove("hidden");
+  const targetSection = $(`#public-step-${step}`);
+  targetSection.classList.remove("hidden");
+
   updateProgress(step);
-  if (step === 3) updateReview();
-  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  if (step === 3) {
+    updateReview();
+  }
+
+  requestAnimationFrame(() => {
+    focusBookingStep(targetSection);
+  });
+}
+
+/*
+  EXPERIÊNCIA GUIADA:
+  sempre leva a cliente diretamente para a etapa atual,
+  sem voltar para o topo da landing page.
+*/
+function focusBookingStep(section) {
+  if (!section) return;
+
+  const headerOffset = window.innerWidth <= 900 ? 82 : 24;
+  const targetTop =
+    section.getBoundingClientRect().top +
+    window.scrollY -
+    headerOffset;
+
+  window.scrollTo({
+    top: Math.max(targetTop, 0),
+    behavior: "smooth"
+  });
+
+  const firstInteractive = section.querySelector(
+    "button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])"
+  );
+
+  if (firstInteractive && window.innerWidth <= 900) {
+    window.setTimeout(() => {
+      firstInteractive.focus({ preventScroll: true });
+    }, 420);
+  }
 }
 
 function updateProgress(step) {

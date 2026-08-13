@@ -584,3 +584,45 @@ body.menu-lock{
     width:92vw;
   }
 }
+
+
+/* ==========================================================
+   UX DE FLUXO — NAVEGAÇÃO INTUITIVA ENTRE ETAPAS
+   ========================================================== */
+
+#booking-area,
+.public-step,
+.slot-card,
+.step-actions{
+  scroll-margin-top:96px;
+}
+
+@media (max-width:900px){
+  .booking-flow-card{
+    scroll-margin-top:78px;
+  }
+
+  .flow-progress{
+    position:sticky;
+    z-index:35;
+    top:70px;
+    margin-left:-12px;
+    margin-right:-12px;
+    padding:10px 12px 12px;
+    background:rgba(255,255,255,.94);
+    border-bottom:1px solid rgba(238,226,230,.92);
+    backdrop-filter:blur(16px);
+  }
+
+  .public-step{
+    scroll-margin-top:132px;
+  }
+
+  .slot-card{
+    scroll-margin-top:132px;
+  }
+
+  .step-actions{
+    scroll-margin-top:132px;
+  }
+}
