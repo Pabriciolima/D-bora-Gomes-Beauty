@@ -142,6 +142,7 @@ const state = {
   paymentCountdownEndsAt: null,
   paymentCountdownExpiredHandled: false,
   paymentCountdownLifecycleBound: false,
+  lastTerminalClientDecision: null,
 
   adminApprovalPoll: null,
   adminApprovalQueue: [],
@@ -1088,6 +1089,7 @@ function renderPaymentReceivedWaitingApproval() {
 }
 
 function renderAppointmentAccepted(status) {
+  state.lastTerminalClientDecision = "accepted";
   stopPaymentPolling();
   stopPaymentCountdown();
   setPixPaymentVisualState("accepted");
@@ -1128,6 +1130,7 @@ function renderAppointmentAccepted(status) {
 }
 
 function renderAppointmentDeclined({ blocked = false } = {}) {
+  state.lastTerminalClientDecision = blocked ? "blocked" : "declined";
   stopPaymentPolling();
   stopPaymentCountdown();
   setPixPaymentVisualState("declined");
@@ -1183,13 +1186,35 @@ function startPaymentPolling() {
     const approval = String(status.admin_approval_status || "pending").toLowerCase();
     const clientDecision = String(status.client_decision || "").toLowerCase();
 
-    if (status.payment_status === "received" && approval === "pending") {
-      renderPaymentReceivedWaitingApproval();
+    if (state.lastTerminalClientDecision === "accepted") {
+      renderAppointmentAccepted(status);
       return;
     }
 
     if (
-      status.payment_status === "received" &&
+      state.lastTerminalClientDecision === "declined" ||
+      state.lastTerminalClientDecision === "blocked"
+    ) {
+      renderAppointmentDeclined({
+        blocked: state.lastTerminalClientDecision === "blocked"
+      });
+      return;
+    }
+
+    // A decisão da Débora é terminal e sempre tem prioridade.
+    if (
+      clientDecision === "blocked" ||
+      clientDecision === "declined" ||
+      ["rejected", "refunded"].includes(approval)
+    ) {
+      renderAppointmentDeclined({
+        blocked: clientDecision === "blocked"
+      });
+      return;
+    }
+
+    if (
+      clientDecision === "accepted" ||
       approval === "accepted"
     ) {
       renderAppointmentAccepted(status);
@@ -1197,12 +1222,18 @@ function startPaymentPolling() {
     }
 
     if (
-      status.appointment_status === "cancelled" ||
-      ["rejected", "refunded"].includes(approval)
+      status.payment_status === "received" &&
+      approval === "pending"
     ) {
+      renderPaymentReceivedWaitingApproval();
+      return;
+    }
+
+    if (status.appointment_status === "cancelled") {
       renderAppointmentDeclined({
         blocked: clientDecision === "blocked"
       });
+      return;
     }
   };
 
@@ -1432,6 +1463,7 @@ function resetPublicBooking() {
   if (el.paymentCountdownCard) {
     el.paymentCountdownCard.classList.remove("expired");
   }
+  state.lastTerminalClientDecision = null;
   state.selectedService = null;
   state.selectedSlot = null;
   state.guestHold = null;
