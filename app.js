@@ -139,6 +139,9 @@ const state = {
   pix: null,
   paymentPoll: null,
   paymentCountdownTimer: null,
+  paymentCountdownEndsAt: null,
+  paymentCountdownExpiredHandled: false,
+  paymentCountdownLifecycleBound: false,
 
   adminApprovalPoll: null,
   adminApprovalQueue: [],
@@ -1049,12 +1052,24 @@ function setPixPaymentVisualState(mode) {
     node.classList.toggle("payment-hidden", mode !== "waiting");
   });
 
+  if (el.paymentCountdownCard && mode === "waiting") {
+    el.paymentCountdownCard.hidden = false;
+  }
+
   step.classList.toggle("payment-received-mode", mode !== "waiting");
 }
 
 function renderPaymentReceivedWaitingApproval() {
   stopPaymentCountdown();
   setPixPaymentVisualState("received");
+
+  if (el.paymentCountdownCard) {
+    el.paymentCountdownCard.hidden = true;
+  }
+
+  if (el.paymentCountdown) {
+    el.paymentCountdown.textContent = "";
+  }
 
   if (!el.paymentStatusBox) return;
 
@@ -1150,8 +1165,9 @@ function renderAppointmentDeclined({ blocked = false } = {}) {
 }
 
 function startPaymentPolling() {
+  // O polling do pagamento e o contador de 5 minutos precisam
+  // funcionar ao mesmo tempo. NÃO interromper o countdown aqui.
   stopPaymentPolling();
-  stopPaymentCountdown();
   setPixPaymentVisualState("waiting");
 
   const checkStatus = async () => {
@@ -1277,55 +1293,122 @@ function stopPaymentPolling() {
 function startPaymentCountdown() {
   stopPaymentCountdown();
 
-  const expiresAt = state.guestHold?.hold_expires_at
-    ? new Date(state.guestHold.hold_expires_at)
-    : new Date(Date.now() + 5 * 60 * 1000);
+  const rawExpiresAt = state.guestHold?.hold_expires_at;
+  const parsedExpiresAt = rawExpiresAt
+    ? new Date(rawExpiresAt).getTime()
+    : NaN;
 
-  const tick = async () => {
-    const remaining = Math.max(0, expiresAt.getTime() - Date.now());
-    const totalSeconds = Math.ceil(remaining / 1000);
-    const min = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
-    const sec = String(totalSeconds % 60).padStart(2, "0");
+  state.paymentCountdownEndsAt =
+    Number.isFinite(parsedExpiresAt) && parsedExpiresAt > Date.now()
+      ? parsedExpiresAt
+      : Date.now() + 5 * 60 * 1000;
 
-    if (el.paymentCountdown) {
-      el.paymentCountdown.textContent = `${min}:${sec}`;
+  state.paymentCountdownExpiredHandled = false;
+
+  if (el.paymentCountdownCard) {
+    el.paymentCountdownCard.classList.remove("expired");
+    el.paymentCountdownCard.hidden = false;
+  }
+
+  bindPaymentCountdownLifecycle();
+
+  // Renderiza imediatamente e depois se autoagenda.
+  runPaymentCountdownTick();
+}
+
+function runPaymentCountdownTick() {
+  if (!state.paymentCountdownEndsAt) return;
+
+  const remainingMs = Math.max(
+    0,
+    state.paymentCountdownEndsAt - Date.now()
+  );
+
+  const totalSeconds = Math.ceil(remainingMs / 1000);
+  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
+
+  if (el.paymentCountdown) {
+    el.paymentCountdown.textContent = `${minutes}:${seconds}`;
+  }
+
+  if (remainingMs <= 0) {
+    handlePaymentCountdownExpired();
+    return;
+  }
+
+  // Autoagendamento: nunca depende de um setInterval contínuo.
+  state.paymentCountdownTimer = window.setTimeout(
+    runPaymentCountdownTick,
+    250
+  );
+}
+
+async function handlePaymentCountdownExpired() {
+  if (state.paymentCountdownExpiredHandled) return;
+
+  state.paymentCountdownExpiredHandled = true;
+  stopPaymentCountdown();
+  stopPaymentPolling();
+
+  try {
+    await db.rpc("expire_guest_holds");
+  } catch (error) {
+    console.error("expire_guest_holds:", error);
+  }
+
+  if (el.paymentCountdownCard) {
+    el.paymentCountdownCard.classList.add("expired");
+  }
+
+  if (el.paymentStatusBox) {
+    el.paymentStatusBox.className = "payment-status expired";
+    el.paymentStatusBox.innerHTML = `
+      <span class="status-dot"></span>
+      <div>
+        <strong>Prazo expirado</strong>
+        <small>O horário foi liberado automaticamente. Volte e escolha outro horário.</small>
+      </div>
+    `;
+  }
+
+  await loadPublicSlots();
+}
+
+function refreshPaymentCountdownNow() {
+  if (!state.paymentCountdownEndsAt) return;
+
+  if (state.paymentCountdownTimer) {
+    clearTimeout(state.paymentCountdownTimer);
+    state.paymentCountdownTimer = null;
+  }
+
+  runPaymentCountdownTick();
+}
+
+function bindPaymentCountdownLifecycle() {
+  if (state.paymentCountdownLifecycleBound) return;
+
+  state.paymentCountdownLifecycleBound = true;
+
+  window.addEventListener("focus", refreshPaymentCountdownNow);
+
+  window.addEventListener("pageshow", refreshPaymentCountdownNow);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      refreshPaymentCountdownNow();
     }
-
-    if (remaining <= 0) {
-      stopPaymentCountdown();
-
-      try {
-        await db.rpc("expire_guest_holds");
-      } catch (error) {
-        console.error("expire_guest_holds:", error);
-      }
-
-      if (el.paymentCountdownCard) {
-        el.paymentCountdownCard.classList.add("expired");
-      }
-
-      el.paymentStatusBox.className = "payment-status expired";
-      el.paymentStatusBox.innerHTML = `
-        <span class="status-dot"></span>
-        <div>
-          <strong>Prazo expirado</strong>
-          <small>O horário foi liberado automaticamente. Volte e escolha outro horário.</small>
-        </div>
-      `;
-
-      await loadPublicSlots();
-    }
-  };
-
-  tick();
-  state.paymentCountdownTimer = window.setInterval(tick, 1000);
+  });
 }
 
 function stopPaymentCountdown() {
   if (state.paymentCountdownTimer) {
-    clearInterval(state.paymentCountdownTimer);
+    clearTimeout(state.paymentCountdownTimer);
     state.paymentCountdownTimer = null;
   }
+
+  state.paymentCountdownEndsAt = null;
 }
 
 function showPaymentSuccess(status) {
@@ -1345,6 +1428,10 @@ function resetPublicBooking() {
   stopPaymentPolling();
   stopPaymentCountdown();
   setPixPaymentVisualState("waiting");
+
+  if (el.paymentCountdownCard) {
+    el.paymentCountdownCard.classList.remove("expired");
+  }
   state.selectedService = null;
   state.selectedSlot = null;
   state.guestHold = null;
