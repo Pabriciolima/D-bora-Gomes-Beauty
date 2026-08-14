@@ -1,5 +1,126 @@
 "use strict";
 
+
+// ============================================================
+// ATUALIZAÇÃO AUTOMÁTICA / ANTI-CACHE
+// ============================================================
+const APP_UPDATE = {
+  currentVersion: null,
+  endpoint: "/api/version",
+  checking: false
+};
+
+async function removeLegacyBrowserCaches() {
+  try {
+    if ("serviceWorker" in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map(registration => registration.unregister()));
+    }
+  } catch (error) {
+    console.warn("Não foi possível remover Service Workers antigos:", error);
+  }
+
+  try {
+    if ("caches" in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(key => caches.delete(key)));
+    }
+  } catch (error) {
+    console.warn("Não foi possível limpar Cache Storage antigo:", error);
+  }
+}
+
+async function fetchDeploymentVersion() {
+  try {
+    const response = await fetch(
+      `${APP_UPDATE.endpoint}?t=${Date.now()}`,
+      {
+        method: "GET",
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache"
+        }
+      }
+    );
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    return String(data?.version || "").trim() || null;
+  } catch {
+    // No Live Server local, /api/version pode não existir.
+    // Isso não deve impedir o aplicativo de funcionar.
+    return null;
+  }
+}
+
+function forceLatestDeployment(version) {
+  const url = new URL(window.location.href);
+
+  url.searchParams.set("__dg_build", version || String(Date.now()));
+
+  // reload para URL diferente: evita reutilizar o HTML antigo do navegador
+  window.location.replace(url.toString());
+}
+
+async function checkForNewDeployment() {
+  if (APP_UPDATE.checking) return;
+  APP_UPDATE.checking = true;
+
+  try {
+    const latestVersion = await fetchDeploymentVersion();
+    if (!latestVersion) return;
+
+    if (!APP_UPDATE.currentVersion) {
+      APP_UPDATE.currentVersion = latestVersion;
+      sessionStorage.setItem("dg_deployment_version", latestVersion);
+      return;
+    }
+
+    if (latestVersion !== APP_UPDATE.currentVersion) {
+      console.info(
+        "Nova versão detectada:",
+        APP_UPDATE.currentVersion,
+        "→",
+        latestVersion
+      );
+
+      APP_UPDATE.currentVersion = latestVersion;
+      sessionStorage.setItem("dg_deployment_version", latestVersion);
+
+      forceLatestDeployment(latestVersion);
+    }
+  } finally {
+    APP_UPDATE.checking = false;
+  }
+}
+
+async function initAutomaticUpdates() {
+  await removeLegacyBrowserCaches();
+
+  const current = await fetchDeploymentVersion();
+
+  if (current) {
+    APP_UPDATE.currentVersion = current;
+    sessionStorage.setItem("dg_deployment_version", current);
+  }
+
+  // No celular, ao voltar para a aba/app, verifica imediatamente se a MAIN mudou.
+  window.addEventListener("focus", checkForNewDeployment);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      checkForNewDeployment();
+    }
+  });
+
+  window.addEventListener("pageshow", () => {
+    checkForNewDeployment();
+  });
+}
+
+
 const db = window.dbClient;
 const CFG = window.APP_CONFIG || {
   businessSlug: "debora-gomes-beauty",
@@ -223,6 +344,11 @@ window.setTimeout(() => {
 }, 10000);
 
 async function init() {
+  // O monitor de atualização roda em paralelo e nunca bloqueia o agendamento.
+  initAutomaticUpdates().catch(error => {
+    console.warn("Monitor de atualização indisponível:", error);
+  });
+
   bindEvents();
   setDateDefaults();
 
@@ -770,16 +896,64 @@ function updateReview() {
   el.reviewDeposit.textContent = money(deposit);
 }
 
+
+function isValidOptionalEmail(value) {
+  const email = String(value || "").trim();
+  if (!email) return true;
+
+  // Validação suficiente para impedir valores como "test" de irem para o Asaas.
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email);
+}
+
+async function getFunctionErrorMessage(error) {
+  try {
+    const context = error?.context;
+
+    if (context && typeof context.clone === "function") {
+      const response = context.clone();
+
+      try {
+        const payload = await response.json();
+
+        if (payload?.error) return String(payload.error);
+        if (payload?.message) return String(payload.message);
+        if (payload?.errors?.[0]?.description) {
+          return String(payload.errors[0].description);
+        }
+      } catch {
+        try {
+          const text = await context.clone().text();
+          if (text?.trim()) return text.trim();
+        } catch {}
+      }
+    }
+  } catch (contextError) {
+    console.warn("Não foi possível ler o retorno detalhado da Edge Function:", contextError);
+  }
+
+  return String(error?.message || "Não foi possível gerar o Pix.");
+}
+
 async function reserveAndGeneratePix() {
   const name = el.guestName.value.trim();
   const phone = digits(el.guestPhone.value);
   const cpf = digits(el.guestCpf.value);
-  const email = el.guestEmail.value.trim().toLowerCase() || null;
+  const rawEmail = el.guestEmail.value.trim().toLowerCase();
+  const email = rawEmail || null;
   const notes = el.guestNotes.value.trim() || null;
 
   if (name.length < 3) return toast("Informe seu nome completo.", "error");
   if (phone.length < 10) return toast("Informe um WhatsApp válido.", "error");
   if (!isValidCPF(cpf)) return toast("Informe um CPF válido.", "error");
+
+  if (!isValidOptionalEmail(rawEmail)) {
+    el.guestEmail?.focus();
+    return toast(
+      "Digite um e-mail válido ou deixe esse campo vazio.",
+      "error"
+    );
+  }
+
   if (!state.selectedService || !state.selectedSlot) return toast("Escolha um horário.", "error");
 
   buttonBusy(el.reserveAndPayBtn, true, "Reservando...");
@@ -807,8 +981,14 @@ async function reserveAndGeneratePix() {
       }
     });
 
-    if (pixError) throw pixError;
-    if (!pixData?.success) throw new Error(pixData?.error || "Não foi possível gerar o Pix.");
+    if (pixError) {
+      const detailedMessage = await getFunctionErrorMessage(pixError);
+      throw new Error(detailedMessage);
+    }
+
+    if (!pixData?.success) {
+      throw new Error(pixData?.error || "Não foi possível gerar o Pix.");
+    }
 
     state.pix = pixData;
 
@@ -849,7 +1029,7 @@ function startPaymentPolling() {
   stopPaymentPolling();
   stopPaymentCountdown();
 
-  state.paymentPoll = window.setInterval(async () => {
+  const checkStatus = async () => {
     if (!state.guestHold?.access_token) return;
 
     const { data, error } = await db.rpc("get_guest_booking_status", {
@@ -860,6 +1040,7 @@ function startPaymentPolling() {
 
     const status = data[0];
     const approval = String(status.admin_approval_status || "pending").toLowerCase();
+    const clientDecision = String(status.client_decision || "").toLowerCase();
 
     if (status.payment_status === "received" && approval === "pending") {
       el.paymentStatusBox.className = "payment-status received";
@@ -867,7 +1048,7 @@ function startPaymentPolling() {
         <span class="status-dot"></span>
         <div>
           <strong>Pagamento recebido ✓</strong>
-          <small>Aguardando a confirmação da profissional.</small>
+          <small>Aguardando a confirmação da Débora. Assim que ela responder, esta tela será atualizada automaticamente.</small>
         </div>
       `;
       stopPaymentCountdown();
@@ -891,18 +1072,100 @@ function startPaymentPolling() {
       stopPaymentPolling();
       stopPaymentCountdown();
 
-      el.paymentStatusBox.className = "payment-status expired";
-      el.paymentStatusBox.innerHTML = `
-        <span class="status-dot"></span>
-        <div>
-          <strong>${approval === "refunded" || approval === "rejected" ? "Atendimento não confirmado" : "Reserva expirada"}</strong>
-          <small>${approval === "refunded" || approval === "rejected"
-            ? "O valor do sinal será devolvido conforme o processamento do meio de pagamento."
-            : "O horário foi liberado. Faça um novo agendamento."}</small>
-        </div>
-      `;
+      if (clientDecision === "blocked") {
+        showClientDecision({
+          type: "blocked",
+          title: "Não foi possível concluir este agendamento",
+          message: "No momento, não conseguiremos concluir novos agendamentos por este canal. Se precisar de ajuda ou quiser conversar com a equipe, entre em contato diretamente conosco.",
+          refund: true
+        });
+        return;
+      }
+
+      showClientDecision({
+        type: "declined",
+        title: "Este atendimento não poderá ser realizado",
+        message: "Neste horário, a Débora não conseguirá realizar seu atendimento. O valor do sinal já foi encaminhado para estorno e o horário foi liberado novamente.",
+        refund: true
+      });
     }
-  }, 3000);
+  };
+
+  checkStatus();
+  state.paymentPoll = window.setInterval(checkStatus, 1000);
+}
+
+
+function showClientDecision({ type = "declined", title, message, refund = false }) {
+  let modal = document.querySelector("#client-decision-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "client-decision-modal";
+    modal.className = "client-decision-backdrop hidden";
+    modal.innerHTML = `
+      <section class="client-decision-card" role="dialog" aria-modal="true" aria-labelledby="client-decision-title">
+        <div class="client-decision-icon" id="client-decision-icon">♡</div>
+        <span class="eyebrow">RESPOSTA DA PROFISSIONAL</span>
+        <h2 id="client-decision-title"></h2>
+        <p id="client-decision-message"></p>
+        <div id="client-decision-refund" class="client-decision-refund hidden">
+          <span>↩</span>
+          <div>
+            <strong>Estorno solicitado</strong>
+            <small>O prazo para o valor voltar à conta depende do processamento do meio de pagamento.</small>
+          </div>
+        </div>
+        <button id="client-decision-action" class="btn btn-primary" type="button">
+          Escolher outro horário
+        </button>
+      </section>
+    `;
+    document.body.appendChild(modal);
+
+    modal.querySelector("#client-decision-action")?.addEventListener("click", () => {
+      modal.classList.add("hidden");
+      resetPublicBooking();
+      window.setTimeout(() => {
+        document.querySelector("#booking-area")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }, 80);
+    });
+  }
+
+  modal.dataset.type = type;
+
+  const icon = modal.querySelector("#client-decision-icon");
+  const titleEl = modal.querySelector("#client-decision-title");
+  const messageEl = modal.querySelector("#client-decision-message");
+  const refundEl = modal.querySelector("#client-decision-refund");
+  const actionEl = modal.querySelector("#client-decision-action");
+
+  if (icon) icon.textContent = type === "blocked" ? "♡" : "↩";
+  if (titleEl) titleEl.textContent = title;
+  if (messageEl) messageEl.textContent = message;
+  refundEl?.classList.toggle("hidden", !refund);
+
+  if (actionEl) {
+    actionEl.textContent = type === "blocked"
+      ? "Voltar ao início"
+      : "Escolher outro horário";
+  }
+
+  modal.classList.remove("hidden");
+
+  if (el.paymentStatusBox) {
+    el.paymentStatusBox.className = "payment-status expired";
+    el.paymentStatusBox.innerHTML = `
+      <span class="status-dot"></span>
+      <div>
+        <strong>${escapeHtml(title)}</strong>
+        <small>${escapeHtml(message)}</small>
+      </div>
+    `;
+  }
 }
 
 function stopPaymentPolling() {
@@ -1966,6 +2229,7 @@ async function acceptCurrentApproval() {
       .update({
         status: "confirmed",
         admin_approval_status: "accepted",
+        client_decision: "accepted",
         admin_decided_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
@@ -1975,7 +2239,7 @@ async function acceptCurrentApproval() {
     if (error) throw error;
 
     closeApprovalModal();
-    toast("Atendimento confirmado na agenda.", "success");
+    toast("Atendimento confirmado. A cliente já recebeu a confirmação na tela.", "success");
     await loadAdminData();
     renderAdmin();
 
@@ -2029,8 +2293,8 @@ async function rejectCurrentApproval() {
     closeApprovalModal();
     toast(
       shouldBlock
-        ? "Pagamento estornado, atendimento cancelado e cliente bloqueada."
-        : "Pagamento estornado e atendimento cancelado.",
+        ? "Atendimento recusado e estorno solicitado. A cliente recebeu uma mensagem discreta na tela."
+        : "Atendimento recusado e estorno solicitado. A cliente já foi avisada na tela.",
       "success"
     );
 
