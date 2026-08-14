@@ -3194,3 +3194,262 @@ body.menu-lock{
     font-size:27px;
   }
 }
+
+
+/* ==========================================================
+   PIX — ESTADOS APÓS O PAGAMENTO
+   ========================================================== */
+
+.payment-hidden{
+  display:none!important;
+}
+
+#public-step-4.payment-received-mode .pix-checkout{
+  display:block!important;
+  max-width:620px;
+  margin-inline:auto;
+}
+
+#public-step-4.payment-received-mode .pix-side{
+  width:100%;
+  display:block;
+}
+
+#public-step-4.payment-received-mode .step-heading p{
+  max-width:520px;
+  margin-inline:auto;
+}
+
+.payment-main-message{
+  display:grid!important;
+  grid-template-columns:58px minmax(0,1fr);
+  gap:14px;
+  align-items:start;
+  width:100%;
+  padding:20px!important;
+  border-radius:22px!important;
+  box-shadow:none!important;
+}
+
+.payment-main-icon{
+  display:grid;
+  width:58px;
+  height:58px;
+  place-items:center;
+  border-radius:50%;
+  background:#dff4e7;
+  color:#24764b;
+  font-size:25px;
+  font-weight:900;
+}
+
+.payment-main-icon.gentle{
+  background:#fff0f4;
+  color:#a45c70;
+}
+
+.payment-main-copy{
+  min-width:0;
+}
+
+.payment-main-copy .eyebrow{
+  display:block;
+  margin-bottom:6px;
+  color:#39815c;
+  font-size:8px;
+}
+
+.payment-main-copy>strong{
+  display:block;
+  font-family:"Playfair Display",serif;
+  font-size:26px;
+  line-height:1.08;
+  color:#2f4939;
+}
+
+.payment-main-copy>small{
+  display:block;
+  margin-top:7px;
+  color:#688071;
+  font-size:10px;
+  line-height:1.55;
+}
+
+.payment-approved-message{
+  border-color:#cce9d7!important;
+  background:linear-gradient(180deg,#f3fcf6,#fff)!important;
+}
+
+.appointment-decision{
+  grid-column:1/-1;
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-top:4px;
+  padding:15px;
+  border-radius:17px;
+}
+
+.appointment-decision.success{
+  border:1px solid #cdebd8;
+  background:#eaf8ef;
+}
+
+.appointment-decision-icon{
+  display:grid;
+  width:42px;
+  height:42px;
+  flex:0 0 auto;
+  place-items:center;
+  border-radius:14px;
+  background:#fff;
+  color:#287d50;
+  font-size:18px;
+  font-weight:900;
+}
+
+.appointment-decision span,
+.appointment-decision strong,
+.appointment-decision small{
+  display:block;
+}
+
+.appointment-decision span{
+  color:#438261;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+.appointment-decision strong{
+  margin-top:3px;
+  font-family:"Playfair Display",serif;
+  color:#264b36;
+  font-size:19px;
+}
+
+.appointment-decision small{
+  margin-top:4px;
+  color:#668071;
+  font-size:9px;
+}
+
+.appointment-reference-inline{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding-top:13px;
+  border-top:1px solid #dcece2;
+}
+
+.appointment-reference-inline span{
+  color:#728478;
+  font-size:8px;
+  font-weight:800;
+}
+
+.appointment-reference-inline strong{
+  color:#31533e;
+  font-size:10px;
+}
+
+.payment-declined-message{
+  border-color:#eddfe3!important;
+  background:linear-gradient(180deg,#fff9fa,#fff)!important;
+}
+
+.payment-declined-message .payment-main-copy .eyebrow{
+  color:#9b6674;
+}
+
+.payment-declined-message .payment-main-copy>strong{
+  color:#4a343b;
+  font-size:23px;
+}
+
+.payment-declined-message .payment-main-copy>small{
+  color:#846d74;
+}
+
+.refund-soft-note{
+  grid-column:1/-1;
+  display:flex;
+  gap:11px;
+  align-items:center;
+  margin-top:3px;
+  padding:13px 14px;
+  border:1px solid #f1e1e5;
+  border-radius:16px;
+  background:#fff8fa;
+}
+
+.refund-soft-note>span{
+  display:grid;
+  width:36px;
+  height:36px;
+  flex:0 0 auto;
+  place-items:center;
+  border-radius:12px;
+  background:#fff0f3;
+  color:#a35c6e;
+  font-size:17px;
+  font-weight:900;
+}
+
+.refund-soft-note strong,
+.refund-soft-note small{
+  display:block;
+}
+
+.refund-soft-note strong{
+  color:#60464d;
+  font-size:10px;
+}
+
+.refund-soft-note small{
+  margin-top:3px;
+  color:#8b747a;
+  font-size:8px;
+  line-height:1.4;
+}
+
+@media(max-width:600px){
+  #public-step-4.payment-received-mode{
+    padding-inline:0!important;
+  }
+
+  #public-step-4.payment-received-mode .pix-checkout{
+    width:100%;
+  }
+
+  .payment-main-message{
+    grid-template-columns:48px minmax(0,1fr);
+    gap:11px;
+    padding:16px!important;
+    border-radius:19px!important;
+  }
+
+  .payment-main-icon{
+    width:48px;
+    height:48px;
+    font-size:21px;
+  }
+
+  .payment-main-copy>strong{
+    font-size:22px;
+  }
+
+  .payment-main-copy>small{
+    font-size:9px;
+  }
+
+  .appointment-decision{
+    padding:13px;
+  }
+
+  .appointment-decision strong{
+    font-size:17px;
+  }
+}

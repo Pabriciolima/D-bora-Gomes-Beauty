@@ -207,6 +207,10 @@ const el = {
   paymentStatusBox: $("#payment-status-box"),
   paymentCountdown: $("#payment-countdown"),
   paymentCountdownCard: $("#payment-countdown-card"),
+  pixQrWrap: $(".pix-qr-wrap"),
+  pixSide: $(".pix-side"),
+  pixValueCard: $(".pix-value-card"),
+  copyPixBtn: $("#copy-pix-btn"),
 
   successMessage: $("#success-message"),
   successReference: $("#success-reference"),
@@ -1025,9 +1029,130 @@ async function copyPix() {
   }
 }
 
+
+function setPixPaymentVisualState(mode) {
+  const step = $("#public-step-4");
+  if (!step) return;
+
+  const pixField = el.pixPayload?.closest(".field");
+
+  const paymentElements = [
+    el.pixQrWrap,
+    el.pixValueCard,
+    pixField,
+    el.copyPixBtn,
+    el.paymentCountdownCard
+  ];
+
+  paymentElements.forEach(node => {
+    if (!node) return;
+    node.classList.toggle("payment-hidden", mode !== "waiting");
+  });
+
+  step.classList.toggle("payment-received-mode", mode !== "waiting");
+}
+
+function renderPaymentReceivedWaitingApproval() {
+  stopPaymentCountdown();
+  setPixPaymentVisualState("received");
+
+  if (!el.paymentStatusBox) return;
+
+  el.paymentStatusBox.className = "payment-status received payment-main-message";
+  el.paymentStatusBox.innerHTML = `
+    <div class="payment-main-icon">✓</div>
+    <div class="payment-main-copy">
+      <span class="eyebrow">PAGAMENTO IDENTIFICADO</span>
+      <strong>Pagamento recebido</strong>
+      <small>
+        Seu sinal foi identificado. Estamos aguardando a confirmação da Débora.
+        Assim que ela responder, esta tela será atualizada automaticamente.
+      </small>
+    </div>
+  `;
+}
+
+function renderAppointmentAccepted(status) {
+  stopPaymentPolling();
+  stopPaymentCountdown();
+  setPixPaymentVisualState("accepted");
+
+  if (!el.paymentStatusBox) return;
+
+  const service = state.selectedService?.name || "seu procedimento";
+  const when = state.selectedSlot
+    ? `${fullDate(new Date(state.selectedSlot))} às ${timeOf(new Date(state.selectedSlot))}`
+    : "no horário escolhido";
+
+  el.paymentStatusBox.className = "payment-status received payment-main-message payment-approved-message";
+  el.paymentStatusBox.innerHTML = `
+    <div class="payment-main-icon">✓</div>
+
+    <div class="payment-main-copy">
+      <span class="eyebrow">PAGAMENTO IDENTIFICADO</span>
+      <strong>Pagamento recebido</strong>
+      <small>Seu sinal foi confirmado com sucesso.</small>
+    </div>
+
+    <div class="appointment-decision success">
+      <div class="appointment-decision-icon">✓</div>
+      <div>
+        <span>ATENDIMENTO APROVADO</span>
+        <strong>Atendimento agendado com sucesso ✨</strong>
+        <small>
+          ${escapeHtml(service)} • ${escapeHtml(when)}
+        </small>
+      </div>
+    </div>
+
+    <div class="appointment-reference-inline">
+      <span>Código do agendamento</span>
+      <strong>${escapeHtml(status.public_reference || "Confirmado")}</strong>
+    </div>
+  `;
+}
+
+function renderAppointmentDeclined({ blocked = false } = {}) {
+  stopPaymentPolling();
+  stopPaymentCountdown();
+  setPixPaymentVisualState("declined");
+
+  if (!el.paymentStatusBox) return;
+
+  const title = blocked
+    ? "Neste momento, não conseguiremos seguir com novos agendamentos por este canal"
+    : "Neste momento, não conseguiremos realizar este atendimento";
+
+  const message = blocked
+    ? "Agradecemos muito o seu interesse e a compreensão. Caso precise falar conosco, você pode entrar em contato diretamente com a equipe."
+    : "Agradecemos a sua compreensão. O sinal será estornado e esperamos poder atendê-la em uma próxima oportunidade.";
+
+  el.paymentStatusBox.className = "payment-status expired payment-main-message payment-declined-message";
+  el.paymentStatusBox.innerHTML = `
+    <div class="payment-main-icon gentle">♡</div>
+
+    <div class="payment-main-copy">
+      <span class="eyebrow">RETORNO DO ATENDIMENTO</span>
+      <strong>${escapeHtml(title)}</strong>
+      <small>${escapeHtml(message)}</small>
+    </div>
+
+    <div class="refund-soft-note">
+      <span>↩</span>
+      <div>
+        <strong>Estorno solicitado</strong>
+        <small>
+          O prazo para o valor retornar depende do processamento do meio de pagamento.
+        </small>
+      </div>
+    </div>
+  `;
+}
+
 function startPaymentPolling() {
   stopPaymentPolling();
   stopPaymentCountdown();
+  setPixPaymentVisualState("waiting");
 
   const checkStatus = async () => {
     if (!state.guestHold?.access_token) return;
@@ -1043,15 +1168,7 @@ function startPaymentPolling() {
     const clientDecision = String(status.client_decision || "").toLowerCase();
 
     if (status.payment_status === "received" && approval === "pending") {
-      el.paymentStatusBox.className = "payment-status received";
-      el.paymentStatusBox.innerHTML = `
-        <span class="status-dot"></span>
-        <div>
-          <strong>Pagamento recebido ✓</strong>
-          <small>Aguardando a confirmação da Débora. Assim que ela responder, esta tela será atualizada automaticamente.</small>
-        </div>
-      `;
-      stopPaymentCountdown();
+      renderPaymentReceivedWaitingApproval();
       return;
     }
 
@@ -1059,9 +1176,7 @@ function startPaymentPolling() {
       status.payment_status === "received" &&
       approval === "accepted"
     ) {
-      stopPaymentPolling();
-      stopPaymentCountdown();
-      showPublicSuccess(status);
+      renderAppointmentAccepted(status);
       return;
     }
 
@@ -1069,24 +1184,8 @@ function startPaymentPolling() {
       status.appointment_status === "cancelled" ||
       ["rejected", "refunded"].includes(approval)
     ) {
-      stopPaymentPolling();
-      stopPaymentCountdown();
-
-      if (clientDecision === "blocked") {
-        showClientDecision({
-          type: "blocked",
-          title: "Não foi possível concluir este agendamento",
-          message: "No momento, não conseguiremos concluir novos agendamentos por este canal. Se precisar de ajuda ou quiser conversar com a equipe, entre em contato diretamente conosco.",
-          refund: true
-        });
-        return;
-      }
-
-      showClientDecision({
-        type: "declined",
-        title: "Este atendimento não poderá ser realizado",
-        message: "Neste horário, a Débora não conseguirá realizar seu atendimento. O valor do sinal já foi encaminhado para estorno e o horário foi liberado novamente.",
-        refund: true
+      renderAppointmentDeclined({
+        blocked: clientDecision === "blocked"
       });
     }
   };
@@ -1244,6 +1343,8 @@ function showPaymentSuccess(status) {
 
 function resetPublicBooking() {
   stopPaymentPolling();
+  stopPaymentCountdown();
+  setPixPaymentVisualState("waiting");
   state.selectedService = null;
   state.selectedSlot = null;
   state.guestHold = null;
