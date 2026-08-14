@@ -3453,3 +3453,58 @@ body.menu-lock{
     font-size:17px;
   }
 }
+
+
+/* ==========================================================
+   AGENDA — CANCELAR ATENDIMENTO CONFIRMADO
+   ========================================================== */
+
+.agenda-timeline-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.agenda-cancel-booking-btn{
+  min-height:32px;
+  padding:0 12px;
+  border:1px solid #efcfd7;
+  border-radius:999px;
+  background:#fff7f9;
+  color:#b24c65;
+  font:800 8px/1 Inter,system-ui,sans-serif;
+  cursor:pointer;
+  transition:.2s ease;
+}
+
+.agenda-cancel-booking-btn:hover{
+  border-color:#d86a83;
+  background:#fff0f4;
+  transform:translateY(-1px);
+}
+
+.agenda-cancel-booking-btn:disabled{
+  opacity:.55;
+  cursor:wait;
+  transform:none;
+}
+
+@media(max-width:600px){
+  .agenda-timeline-bottom{
+    align-items:flex-start!important;
+    gap:8px!important;
+  }
+
+  .agenda-timeline-actions{
+    width:100%;
+    justify-content:space-between;
+  }
+
+  .agenda-cancel-booking-btn{
+    min-height:34px;
+    padding:0 10px;
+    font-size:7px;
+  }
+}

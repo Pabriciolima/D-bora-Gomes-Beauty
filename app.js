@@ -143,6 +143,7 @@ const state = {
   paymentCountdownExpiredHandled: false,
   paymentCountdownLifecycleBound: false,
   lastTerminalClientDecision: null,
+  lastPublicBookingRenderState: null,
 
   adminApprovalPoll: null,
   adminApprovalQueue: [],
@@ -488,6 +489,13 @@ function bindEvents() {
   el.agendaPrevWeek?.addEventListener("click", () => shiftAgendaWeek(-7));
   el.agendaNextWeek?.addEventListener("click", () => shiftAgendaWeek(7));
   el.agendaTodayBtn?.addEventListener("click", goAgendaToday);
+
+  el.adminBookings?.addEventListener("click", event => {
+    const cancelBtn = event.target.closest("[data-cancel-booking]");
+    if (!cancelBtn) return;
+
+    cancelConfirmedBooking(cancelBtn.dataset.cancelBooking);
+  });
   el.servicesSearch?.addEventListener("input", () => {
     state.servicesSearch = el.servicesSearch.value.trim().toLowerCase();
     renderPublicServices();
@@ -1089,8 +1097,15 @@ function renderPaymentReceivedWaitingApproval() {
 }
 
 function renderAppointmentAccepted(status) {
+  // "accepted" não encerra o monitoramento:
+  // a profissional ainda pode cancelar/estornar depois pela agenda.
   state.lastTerminalClientDecision = "accepted";
-  stopPaymentPolling();
+
+  if (state.lastPublicBookingRenderState === "accepted") {
+    return;
+  }
+
+  state.lastPublicBookingRenderState = "accepted";
   stopPaymentCountdown();
   setPixPaymentVisualState("accepted");
 
@@ -1130,7 +1145,15 @@ function renderAppointmentAccepted(status) {
 }
 
 function renderAppointmentDeclined({ blocked = false } = {}) {
-  state.lastTerminalClientDecision = blocked ? "blocked" : "declined";
+  const finalState = blocked ? "blocked" : "declined";
+  state.lastTerminalClientDecision = finalState;
+
+  if (state.lastPublicBookingRenderState === finalState) {
+    stopPaymentPolling();
+    return;
+  }
+
+  state.lastPublicBookingRenderState = finalState;
   stopPaymentPolling();
   stopPaymentCountdown();
   setPixPaymentVisualState("declined");
@@ -1186,11 +1209,29 @@ function startPaymentPolling() {
     const approval = String(status.admin_approval_status || "pending").toLowerCase();
     const clientDecision = String(status.client_decision || "").toLowerCase();
 
-    if (state.lastTerminalClientDecision === "accepted") {
+    // O servidor sempre tem prioridade sobre uma confirmação antiga.
+    // Isso é essencial quando um atendimento já confirmado é cancelado depois.
+    if (
+      clientDecision === "blocked" ||
+      clientDecision === "declined" ||
+      ["rejected", "refunded"].includes(approval)
+    ) {
+      renderAppointmentDeclined({
+        blocked: clientDecision === "blocked"
+      });
+      return;
+    }
+
+    if (
+      clientDecision === "accepted" ||
+      approval === "accepted"
+    ) {
       renderAppointmentAccepted(status);
       return;
     }
 
+    // O marcador local só é usado enquanto o servidor ainda não retornou
+    // uma decisão terminal nova.
     if (
       state.lastTerminalClientDecision === "declined" ||
       state.lastTerminalClientDecision === "blocked"
@@ -1464,6 +1505,7 @@ function resetPublicBooking() {
     el.paymentCountdownCard.classList.remove("expired");
   }
   state.lastTerminalClientDecision = null;
+  state.lastPublicBookingRenderState = null;
   state.selectedService = null;
   state.selectedSlot = null;
   state.guestHold = null;
@@ -1984,9 +2026,27 @@ function agendaTimelineCard(b, index, rows) {
 
         <div class="agenda-timeline-bottom">
           <small>${escapeHtml(b.public_reference || "")}</small>
-          <span class="payment-pill ${paid ? "paid" : "pending"}">
-            ${paid ? "✓ Pago" : "○ Pendente"}
-          </span>
+
+          <div class="agenda-timeline-actions">
+            <span class="payment-pill ${paid ? "paid" : "pending"}">
+              ${paid ? "✓ Pago" : "○ Pendente"}
+            </span>
+
+            ${
+              status === "confirmed" && paid
+                ? `
+                  <button
+                    class="agenda-cancel-booking-btn"
+                    type="button"
+                    data-cancel-booking="${b.id}"
+                    aria-label="Cancelar agendamento de ${escapeHtml(b.customer?.name || "cliente")}"
+                  >
+                    Cancelar agendamento
+                  </button>
+                `
+                : ""
+            }
+          </div>
         </div>
       </div>
     </article>
@@ -2526,6 +2586,100 @@ async function rejectCurrentApproval() {
     toast(readableError(error), "error");
   } finally {
     buttonBusy(el.approvalRejectBtn, false, "Não aceitar");
+  }
+}
+
+
+async function cancelConfirmedBooking(appointmentId) {
+  const booking = state.adminBookings.find(item => item.id === appointmentId);
+
+  if (!booking) {
+    toast("Agendamento não encontrado.", "error");
+    return;
+  }
+
+  if (normalizeStatus(booking.status) !== "confirmed") {
+    toast("Este atendimento não está confirmado.", "error");
+    return;
+  }
+
+  const customer = Array.isArray(booking.customer)
+    ? booking.customer[0]
+    : booking.customer;
+
+  const proceed = await appConfirm({
+    title: "Cancelar este agendamento?",
+    message: `O atendimento de ${customer?.name || "esta cliente"} será cancelado e o sinal recebido será estornado.`,
+    confirmText: "Sim, cancelar e estornar",
+    cancelText: "Manter agendamento",
+    tone: "danger",
+    icon: "↩"
+  });
+
+  if (!proceed) return;
+
+  const shouldBlock = await appConfirm({
+    title: "Bloquear esta cliente?",
+    message: `Deseja impedir novos agendamentos de ${customer?.name || "esta cliente"} usando WhatsApp e CPF?`,
+    confirmText: "Sim, bloquear",
+    cancelText: "Não bloquear",
+    tone: "warning",
+    icon: "!"
+  });
+
+  const button = document.querySelector(
+    `[data-cancel-booking="${appointmentId}"]`
+  );
+
+  if (button) {
+    button.disabled = true;
+    button.dataset.originalText = button.textContent;
+    button.textContent = "Cancelando...";
+  }
+
+  try {
+    const { data, error } = await db.functions.invoke("admin-booking-action", {
+      body: {
+        action: "cancel_refund",
+        appointmentId,
+        blockCustomer: shouldBlock
+      }
+    });
+
+    if (error) {
+      const detailedMessage = typeof getFunctionErrorMessage === "function"
+        ? await getFunctionErrorMessage(error)
+        : error.message;
+      throw new Error(detailedMessage);
+    }
+
+    if (!data?.success) {
+      throw new Error(
+        data?.error ||
+        "Não foi possível cancelar e estornar este agendamento."
+      );
+    }
+
+    toast(
+      shouldBlock
+        ? "Agendamento cancelado, estorno solicitado e cliente bloqueada."
+        : "Agendamento cancelado e estorno solicitado. A cliente já pode receber a atualização.",
+      "success"
+    );
+
+    await loadAdminData();
+    renderAdmin();
+
+  } catch (error) {
+    console.error("cancelConfirmedBooking:", error);
+    toast(readableError(error), "error");
+  } finally {
+    if (button?.isConnected) {
+      button.disabled = false;
+      button.textContent =
+        button.dataset.originalText ||
+        "Cancelar agendamento";
+    }
   }
 }
 
