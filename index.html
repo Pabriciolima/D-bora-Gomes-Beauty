@@ -116,6 +116,13 @@
           seu agendamento pelo Pix.
         </p>
 
+        <div class="hero-actions">
+          <button id="hero-book-now" class="btn btn-primary hero-book-now" type="button">
+            Agendar agora
+          </button>
+          <span class="hero-helper">Leva menos de 1 minuto para escolher seu horário.</span>
+        </div>
+
         <div class="public-benefits">
           <span>✦ Agenda online</span>
           <span>♡ Atendimento premium</span>
@@ -124,6 +131,15 @@
       </div>
 
       <div class="public-hero-mark">DG</div>
+    </section>
+
+    <section class="quick-start" aria-label="Início rápido do agendamento">
+      <div class="quick-start-copy">
+        <span class="eyebrow">COMECE POR AQUI</span>
+        <strong>Escolha um procedimento abaixo</strong>
+        <small>Depois você escolhe dia, horário e paga o sinal pelo Pix.</small>
+      </div>
+      <div class="quick-start-step">1</div>
     </section>
 
     <section id="booking-area" class="booking-flow-card">
@@ -140,9 +156,9 @@
       <!-- ETAPA 1 -->
       <section id="public-step-1" class="public-step">
         <header class="step-heading">
-          <span class="eyebrow">Escolha seu procedimento</span>
-          <h2>O que você deseja fazer?</h2>
-          <p>Selecione um serviço para ver os horários disponíveis.</p>
+          <span class="eyebrow">PASSO 1 DE 4</span>
+          <h2>Escolha seu procedimento</h2>
+          <p>Toque no serviço desejado e você irá direto para os horários disponíveis.</p>
         </header>
 
         <div id="public-services-grid" class="service-grid public-service-grid"></div>
@@ -283,6 +299,14 @@
               Copiar código Pix
             </button>
 
+            <div id="payment-countdown-card" class="payment-countdown-card">
+              <div>
+                <span>Tempo para pagar</span>
+                <strong id="payment-countdown">05:00</strong>
+              </div>
+              <small>Se o prazo terminar sem pagamento, o horário será liberado automaticamente.</small>
+            </div>
+
             <div id="payment-status-box" class="payment-status pending">
               <span class="status-dot"></span>
               <div>
@@ -340,6 +364,7 @@
         <button class="nav-item" data-page="clients" type="button"><span>♡</span>Clientes</button>
         <button class="nav-item" data-page="services" type="button"><span>✦</span>Serviços</button>
         <button class="nav-item" data-page="finance" type="button"><span>R$</span>Financeiro</button>
+        <button class="nav-item" data-page="account" type="button"><span>⚙</span>Conta e segurança</button>
       </nav>
 
       <div class="sidebar-footer">
@@ -350,6 +375,7 @@
             <span>Proprietária</span>
           </div>
         </div>
+        <button class="btn btn-soft account-shortcut-btn" data-page="account" type="button">Conta e segurança</button>
         <button id="logout-btn" class="btn btn-soft" type="button">Sair</button>
       </div>
     </aside>
@@ -370,119 +396,403 @@
         </div>
 
         <div class="topbar-right">
-          <div id="topbar-avatar" class="avatar">DG</div>
+          <button id="topbar-avatar" class="avatar topbar-avatar-btn" data-page="account" type="button" aria-label="Abrir conta e segurança">DG</button>
         </div>
       </header>
 
       <section id="page-dashboard" class="page">
-        <header class="page-intro">
-          <span class="eyebrow">Painel administrativo</span>
-          <h2>Seu negócio, em um só lugar.</h2>
-          <p>Agenda, clientes e faturamento em uma visão rápida.</p>
-        </header>
+        <section class="admin-welcome-card">
+          <div>
+            <span class="eyebrow admin-eyebrow-light">PAINEL PROFISSIONAL</span>
+            <p id="admin-date-label" class="admin-date-label">Hoje</p>
+            <h2>Olá, <span id="admin-first-name">Débora</span> ✨</h2>
+            <p class="admin-welcome-copy">Sua agenda e os números mais importantes do negócio estão aqui.</p>
+          </div>
+          <div class="admin-welcome-mark">DG</div>
+        </section>
 
-        <div class="stats-grid">
+        <section class="today-summary-strip">
+          <div>
+            <span>Hoje</span>
+            <strong id="metric-today-bookings">0 atendimentos</strong>
+          </div>
+          <div>
+            <span>Previsto hoje</span>
+            <strong id="metric-today-value">R$ 0,00</strong>
+          </div>
+          <button class="mini-action" type="button" data-page="agenda">Ver agenda →</button>
+        </section>
+
+        <div class="stats-grid admin-stats-premium">
           <article class="stat-card rose">
             <div class="stat-icon">▣</div>
             <span>Agendamentos</span>
             <strong id="metric-bookings">0</strong>
-            <small>Total registrado</small>
+            <small id="metric-bookings-month">0 neste mês</small>
           </article>
 
           <article class="stat-card cream">
             <div class="stat-icon">♡</div>
             <span>Clientes</span>
             <strong id="metric-clients">0</strong>
-            <small>Clientes identificadas</small>
+            <small id="metric-new-clients">0 novas no mês</small>
           </article>
 
           <article class="stat-card white">
-            <div class="stat-icon">✦</div>
-            <span>Serviços</span>
-            <strong id="metric-services">0</strong>
-            <small>Ativos</small>
+            <div class="stat-icon">◌</div>
+            <span>Ticket médio</span>
+            <strong id="metric-ticket">R$ 0,00</strong>
+            <small>Por sinal recebido</small>
           </article>
 
           <article class="stat-card dark">
             <div class="stat-icon">R$</div>
             <span>Receita confirmada</span>
             <strong id="metric-revenue">R$ 0,00</strong>
-            <small>Pagamentos recebidos</small>
+            <small id="metric-revenue-month">Recebido no período</small>
           </article>
         </div>
 
-        <section class="panel-card">
-          <div class="panel-head">
-            <div>
-              <span class="eyebrow">Próximos horários</span>
-              <h3>Agenda</h3>
+        <div class="admin-dashboard-grid">
+          <section class="panel-card agenda-focus-card">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">AGENDA DE HOJE</span>
+                <h3>Próximos atendimentos</h3>
+              </div>
+              <button class="text-action" type="button" data-page="agenda">Agenda completa</button>
             </div>
-          </div>
-          <div id="dashboard-bookings" class="booking-list compact"></div>
-        </section>
+            <div id="dashboard-bookings" class="booking-list compact"></div>
+          </section>
+
+          <section class="panel-card insights-card">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">RESUMO</span>
+                <h3>Seu mês</h3>
+              </div>
+            </div>
+
+            <div class="insight-list">
+              <div class="insight-row">
+                <span class="insight-icon success">✓</span>
+                <div>
+                  <small>Recebido</small>
+                  <strong id="dashboard-month-received">R$ 0,00</strong>
+                </div>
+              </div>
+
+              <div class="insight-row">
+                <span class="insight-icon pending">○</span>
+                <div>
+                  <small>Aguardando Pix</small>
+                  <strong id="dashboard-month-pending">R$ 0,00</strong>
+                </div>
+              </div>
+
+              <div class="insight-row">
+                <span class="insight-icon rose">♡</span>
+                <div>
+                  <small>Cliente destaque</small>
+                  <strong id="dashboard-top-client">—</strong>
+                </div>
+              </div>
+
+              <div class="insight-row">
+                <span class="insight-icon cream">✦</span>
+                <div>
+                  <small>Serviço mais agendado</small>
+                  <strong id="dashboard-top-service">—</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
       </section>
 
       <section id="page-agenda" class="page hidden">
-        <header class="page-intro split">
+        <header class="page-intro admin-section-title agenda-app-title">
           <div>
-            <span class="eyebrow">Organização</span>
-            <h2>Agenda</h2>
-            <p>Todos os agendamentos realizados pelo link público.</p>
-          </div>
-          <div class="filter-row">
-            <input id="agenda-date-filter" class="control" type="date" />
-            <select id="agenda-status-filter" class="control">
-              <option value="all">Todos os status</option>
-              <option value="pending">Aguardando Pix</option>
-              <option value="confirmed">Confirmado</option>
-              <option value="completed">Concluído</option>
-              <option value="cancelled">Cancelado</option>
-            </select>
+            <span class="eyebrow">AGENDA</span>
+            <h2>Atendimentos</h2>
+            <p>Escolha um dia e veja rapidamente quem é o próximo atendimento.</p>
           </div>
         </header>
 
-        <section class="panel-card">
-          <div id="admin-bookings" class="booking-list"></div>
+        <section class="agenda-app-shell">
+          <div class="agenda-week-head">
+            <div>
+              <span class="agenda-month-label" id="agenda-month-label">Agosto 2026</span>
+              <strong id="agenda-selected-label">Hoje</strong>
+            </div>
+            <div class="agenda-week-actions">
+              <button id="agenda-prev-week" class="agenda-icon-btn" type="button" aria-label="Semana anterior">‹</button>
+              <button id="agenda-today-btn" class="agenda-today-btn" type="button">Hoje</button>
+              <button id="agenda-next-week" class="agenda-icon-btn" type="button" aria-label="Próxima semana">›</button>
+            </div>
+          </div>
+
+          <div id="agenda-week-strip" class="agenda-week-strip"></div>
+
+          <div class="agenda-day-summary">
+            <div>
+              <span>Atendimentos</span>
+              <strong id="agenda-day-count">0</strong>
+            </div>
+            <div>
+              <span>Previsto</span>
+              <strong id="agenda-day-value">R$ 0,00</strong>
+            </div>
+            <div>
+              <span>Recebido</span>
+              <strong id="agenda-day-paid">R$ 0,00</strong>
+            </div>
+            <div>
+              <span>A receber</span>
+              <strong id="agenda-day-remaining">R$ 0,00</strong>
+            </div>
+          </div>
+
+          <section class="agenda-now-card">
+            <div class="agenda-now-head">
+              <div>
+                <span class="eyebrow">AGORA / PRÓXIMO</span>
+                <h3>Quem está na vez?</h3>
+              </div>
+              <span id="agenda-now-status" class="agenda-now-status">Sem atendimento</span>
+            </div>
+            <div id="agenda-next-booking" class="agenda-next-booking"></div>
+          </section>
+
+          <div class="agenda-app-grid">
+            <section class="panel-card agenda-panel-card agenda-list-panel">
+              <div class="panel-head agenda-list-head">
+                <div>
+                  <span class="eyebrow">DIA SELECIONADO</span>
+                  <h3 id="agenda-list-title">Atendimentos do dia</h3>
+                </div>
+
+                <select id="agenda-status-filter" class="control agenda-status-filter">
+                  <option value="all">Todos</option>
+                  <option value="pending">Aguardando Pix</option>
+                  <option value="confirmed">Confirmados</option>
+                  <option value="completed">Concluídos</option>
+                  <option value="cancelled">Cancelados</option>
+                </select>
+              </div>
+
+              <div id="admin-bookings" class="agenda-timeline"></div>
+            </section>
+
+            <section class="panel-card block-schedule-card">
+              <div class="panel-head">
+                <div>
+                  <span class="eyebrow">INDISPONIBILIDADE</span>
+                  <h3>Bloquear horário</h3>
+                </div>
+              </div>
+
+              <form id="block-period-form" class="block-period-form">
+                <label class="field">
+                  <span>Data</span>
+                  <input id="block-date" type="date" required />
+                </label>
+
+                <div class="block-time-grid">
+                  <label class="field">
+                    <span>Início</span>
+                    <input id="block-start-time" type="time" required />
+                  </label>
+
+                  <label class="field">
+                    <span>Fim</span>
+                    <input id="block-end-time" type="time" required />
+                  </label>
+                </div>
+
+                <label class="field">
+                  <span>Motivo</span>
+                  <input id="block-reason" type="text" maxlength="120" placeholder="Ex.: almoço, compromisso..." />
+                </label>
+
+                <button id="block-period-btn" class="btn btn-primary" type="submit">
+                  Bloquear período
+                </button>
+              </form>
+
+              <div class="blocked-list-head">
+                <span>Próximos bloqueios</span>
+              </div>
+              <div id="blocked-periods-list" class="blocked-periods-list"></div>
+            </section>
+          </div>
         </section>
       </section>
 
       <section id="page-clients" class="page hidden">
-        <header class="page-intro">
-          <span class="eyebrow">CRM</span>
-          <h2>Clientes</h2>
-          <p>As clientes são identificadas automaticamente pelo WhatsApp.</p>
+        <header class="page-intro admin-section-title">
+          <div>
+            <span class="eyebrow">RELACIONAMENTO</span>
+            <h2>Suas clientes</h2>
+            <p>Histórico, frequência e ranking para identificar suas melhores clientes.</p>
+          </div>
         </header>
 
+        <div class="stats-grid client-stats-grid">
+          <article class="stat-card rose"><span>Total de clientes</span><strong id="clients-total">0</strong><small>Identificadas no sistema</small></article>
+          <article class="stat-card cream"><span>Novas no mês</span><strong id="clients-new-month">0</strong><small>Primeiro cadastro</small></article>
+          <article class="stat-card white"><span>Clientes recorrentes</span><strong id="clients-returning">0</strong><small>2+ agendamentos</small></article>
+          <article class="stat-card dark"><span>Top cliente</span><strong id="clients-top-name">—</strong><small id="clients-top-meta">Sem histórico ainda</small></article>
+        </div>
+
+        <section class="panel-card client-ranking-card">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">RANKING VIP</span>
+              <h3>Clientes que mais agendam</h3>
+            </div>
+          </div>
+          <div id="client-ranking" class="client-ranking"></div>
+        </section>
+
         <section class="panel-card">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">BASE COMPLETA</span>
+              <h3>Todas as clientes</h3>
+            </div>
+          </div>
           <div id="clients-table" class="table-wrap"></div>
         </section>
       </section>
 
       <section id="page-services" class="page hidden">
-        <header class="page-intro">
-          <span class="eyebrow">Catálogo</span>
-          <h2>Serviços</h2>
-          <p>Serviços disponíveis no agendamento público.</p>
+        <header class="page-intro admin-section-title services-app-title">
+          <div>
+            <span class="eyebrow">CATÁLOGO</span>
+            <h2>Serviços</h2>
+            <p>Edite os procedimentos que aparecem para suas clientes.</p>
+          </div>
+
+          <button id="new-service-btn" class="btn btn-primary service-create-btn" type="button">
+            + Novo procedimento
+          </button>
         </header>
 
-        <div id="admin-services-grid" class="service-grid"></div>
+        <section class="services-admin-shell">
+          <div class="services-toolbar">
+            <div class="services-search-wrap">
+              <span>⌕</span>
+              <input id="services-search" type="search" placeholder="Buscar procedimento..." />
+            </div>
+
+            <select id="services-status-filter" class="control">
+              <option value="all">Todos os serviços</option>
+              <option value="active">Disponíveis</option>
+              <option value="inactive">Desativados</option>
+            </select>
+          </div>
+
+          <div id="admin-services-grid" class="service-grid admin-service-grid"></div>
+        </section>
       </section>
 
       <section id="page-finance" class="page hidden">
-        <header class="page-intro">
-          <span class="eyebrow">Financeiro</span>
-          <h2>Pagamentos</h2>
-          <p>Acompanhe sinais pagos e cobranças pendentes.</p>
+        <header class="page-intro admin-section-title">
+          <div>
+            <span class="eyebrow">FINANCEIRO</span>
+            <h2>Seu faturamento</h2>
+            <p>Sinais recebidos, valores pendentes e movimentações do agendamento online.</p>
+          </div>
         </header>
 
         <div class="stats-grid finance-stats">
-          <article class="stat-card white"><span>Recebido</span><strong id="finance-received">R$ 0,00</strong><small>Pix confirmados</small></article>
+          <article class="stat-card dark"><span>Recebido</span><strong id="finance-received">R$ 0,00</strong><small>Pix confirmados</small></article>
           <article class="stat-card cream"><span>Pendente</span><strong id="finance-pending">R$ 0,00</strong><small>Aguardando pagamento</small></article>
+          <article class="stat-card rose"><span>Recebido no mês</span><strong id="finance-month">R$ 0,00</strong><small>Mês atual</small></article>
+          <article class="stat-card white"><span>Ticket médio</span><strong id="finance-ticket">R$ 0,00</strong><small>Por pagamento recebido</small></article>
         </div>
 
         <section class="panel-card">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">MOVIMENTAÇÕES</span>
+              <h3>Pagamentos</h3>
+            </div>
+          </div>
           <div id="payments-table" class="table-wrap"></div>
         </section>
+      </section>
+
+      <section id="page-account" class="page hidden">
+        <header class="page-intro admin-section-title">
+          <div>
+            <span class="eyebrow">CONTA ADMINISTRATIVA</span>
+            <h2>Conta e segurança</h2>
+            <p>Altere o e-mail de acesso e a senha do painel sem precisar entrar no Supabase.</p>
+          </div>
+        </header>
+
+        <div class="account-grid">
+          <section class="panel-card account-profile-card">
+            <div class="account-profile-head">
+              <div id="account-avatar" class="account-avatar">DG</div>
+              <div>
+                <span class="eyebrow">ACESSO ATUAL</span>
+                <h3 id="account-name">Débora Gomes</h3>
+                <p id="account-current-email">—</p>
+              </div>
+            </div>
+
+            <div class="security-note">
+              <span>✓</span>
+              <div>
+                <strong>Conta protegida pelo Supabase Auth</strong>
+                <small>A senha nunca é exibida nem armazenada no navegador.</small>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-card account-form-card">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">ALTERAR ACESSO</span>
+                <h3>E-mail e senha</h3>
+              </div>
+            </div>
+
+            <form id="account-security-form" class="account-security-form">
+              <label class="field">
+                <span>Novo e-mail</span>
+                <input id="account-new-email" type="email" autocomplete="email" placeholder="novo@email.com" />
+                <small>Deixe em branco para manter o e-mail atual.</small>
+              </label>
+
+              <div class="account-password-grid">
+                <label class="field">
+                  <span>Nova senha</span>
+                  <div class="password-field">
+                    <input id="account-new-password" type="password" autocomplete="new-password" minlength="6" placeholder="Mínimo de 6 caracteres" />
+                    <button id="toggle-account-password" class="password-toggle" type="button">Mostrar</button>
+                  </div>
+                </label>
+
+                <label class="field">
+                  <span>Confirmar nova senha</span>
+                  <input id="account-confirm-password" type="password" autocomplete="new-password" minlength="6" placeholder="Repita a nova senha" />
+                </label>
+              </div>
+
+              <div class="account-security-actions">
+                <button id="account-save-btn" class="btn btn-primary" type="submit">Salvar alterações</button>
+              </div>
+
+              <p class="account-security-help">
+                Se o projeto exigir confirmação de troca de e-mail, o Supabase enviará a confirmação para o endereço correspondente.
+              </p>
+            </form>
+          </section>
+        </div>
       </section>
     </section>
 
@@ -491,6 +801,7 @@
       <button class="mobile-nav-item" data-page="agenda" type="button"><span>▣</span><small>Agenda</small></button>
       <button class="mobile-nav-item" data-page="clients" type="button"><span>♡</span><small>Clientes</small></button>
       <button class="mobile-nav-item" data-page="services" type="button"><span>✦</span><small>Serviços</small></button>
+      <button class="mobile-nav-item" data-page="finance" type="button"><span>R$</span><small>Financeiro</small></button>
     </nav>
   </main>
 
@@ -508,18 +819,166 @@
       <form id="admin-login-form" class="admin-login-form">
         <label class="field">
           <span>E-mail</span>
-          <input id="admin-email" type="email" autocomplete="email" required />
+          <input id="admin-email" type="email" autocomplete="email" value="pabriciolima1@gmail.com" required />
         </label>
 
         <label class="field">
           <span>Senha</span>
           <input id="admin-password" type="password" autocomplete="current-password" required />
+          <small class="login-security-helper">Use a senha cadastrada para esta conta no Supabase Auth.</small>
         </label>
 
         <button id="admin-login-submit" class="btn btn-primary" type="submit">Entrar no painel</button>
       </form>
     </section>
   </div>
+
+  <div id="service-editor-modal" class="modal-backdrop hidden service-editor-backdrop">
+    <section class="modal-card service-editor-modal">
+      <header class="service-editor-header">
+        <div>
+          <span class="eyebrow">GESTÃO DE PROCEDIMENTO</span>
+          <h2 id="service-editor-title">Editar serviço</h2>
+          <p>As alterações ficam visíveis para a cliente no agendamento.</p>
+        </div>
+        <button id="close-service-editor" class="icon-btn" type="button">×</button>
+      </header>
+
+      <form id="service-editor-form" class="service-editor-form">
+        <input id="service-edit-id" type="hidden" />
+
+        <div class="service-image-editor">
+          <div id="service-image-preview-wrap" class="service-image-preview-wrap">
+            <img id="service-image-preview" class="service-image-preview hidden" alt="Prévia do procedimento" />
+            <div id="service-image-placeholder" class="service-image-placeholder">
+              <span>✦</span>
+              <strong>Imagem do procedimento</strong>
+              <small>JPG, PNG ou WEBP</small>
+            </div>
+          </div>
+          <label class="service-upload-btn">
+            <input id="service-image-file" type="file" accept="image/png,image/jpeg,image/webp" />
+            Escolher imagem
+          </label>
+        </div>
+
+        <div class="service-form-grid">
+          <label class="field service-field-wide">
+            <span>Nome do procedimento</span>
+            <input id="service-edit-name" type="text" maxlength="120" required />
+          </label>
+
+          <label class="field service-field-wide">
+            <span>Legenda / descrição</span>
+            <textarea id="service-edit-description" rows="4" maxlength="500" placeholder="Explique de forma curta o procedimento para a cliente."></textarea>
+          </label>
+
+          <label class="field">
+            <span>Valor total</span>
+            <input id="service-edit-price" type="number" min="0" step="0.01" required />
+          </label>
+
+          <label class="field">
+            <span>Duração em minutos</span>
+            <input id="service-edit-duration" type="number" min="5" step="5" required />
+          </label>
+
+          <label class="field">
+            <span>Sinal (%)</span>
+            <input id="service-edit-deposit" type="number" min="0" max="100" step="1" required />
+          </label>
+
+          <label class="service-active-toggle">
+            <input id="service-edit-active" type="checkbox" />
+            <span>Disponível para agendamento</span>
+          </label>
+        </div>
+
+        <div class="service-editor-actions">
+          <button id="delete-service-btn" class="btn btn-soft danger-soft hidden" type="button">Excluir procedimento</button>
+          <button id="save-service-btn" class="btn btn-primary" type="submit">Salvar alterações</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+
+  <div id="approval-modal" class="modal-backdrop hidden approval-modal-backdrop">
+    <section class="modal-card approval-modal-card">
+      <header class="approval-modal-header">
+        <div class="money-alert-icon">R$</div>
+        <div>
+          <span class="eyebrow">PIX RECEBIDO</span>
+          <h2>Novo pagamento recebido 💸</h2>
+          <p>Confirme se deseja aceitar este atendimento.</p>
+        </div>
+      </header>
+
+      <div class="approval-client-card">
+        <div>
+          <span>Cliente</span>
+          <strong id="approval-client-name">—</strong>
+        </div>
+        <div>
+          <span>WhatsApp</span>
+          <strong id="approval-client-phone">—</strong>
+        </div>
+        <div>
+          <span>CPF</span>
+          <strong id="approval-client-cpf">—</strong>
+        </div>
+        <div>
+          <span>Serviço</span>
+          <strong id="approval-service">—</strong>
+        </div>
+        <div>
+          <span>Data e horário</span>
+          <strong id="approval-datetime">—</strong>
+        </div>
+        <div>
+          <span>Sinal recebido</span>
+          <strong id="approval-deposit">—</strong>
+        </div>
+        <div class="approval-remaining">
+          <span>Receber no atendimento</span>
+          <strong id="approval-remaining">—</strong>
+        </div>
+      </div>
+
+      <div class="approval-actions">
+        <button id="approval-reject-btn" class="btn btn-soft danger-soft" type="button">
+          Não aceitar
+        </button>
+        <button id="approval-accept-btn" class="btn btn-primary" type="button">
+          Sim, confirmar atendimento
+        </button>
+      </div>
+    </section>
+  </div>
+
+
+  <div id="confirm-modal" class="modal-backdrop hidden confirm-modal-backdrop">
+    <section class="modal-card confirm-modal-card">
+      <button id="confirm-modal-close" class="modal-close confirm-modal-close" type="button" aria-label="Fechar">×</button>
+
+      <div class="confirm-modal-icon" id="confirm-modal-icon">?</div>
+
+      <span class="eyebrow">CONFIRMAÇÃO</span>
+      <h2 id="confirm-modal-title">Confirmar ação</h2>
+      <p id="confirm-modal-message">Deseja continuar?</p>
+
+      <div class="confirm-modal-actions">
+        <button id="confirm-modal-cancel" class="btn btn-soft" type="button">Cancelar</button>
+        <button id="confirm-modal-ok" class="btn btn-primary" type="button">Confirmar</button>
+      </div>
+    </section>
+  </div>
+
+
+  <button id="mobile-quick-book" class="mobile-quick-book" type="button">
+    <span>Agendar agora</span>
+    <small>Escolha um procedimento</small>
+  </button>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./supabase-config.js"></script>
