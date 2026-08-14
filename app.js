@@ -1547,6 +1547,8 @@ function renderAgendaNextBooking(rows) {
 
   if (!next) {
     el.agendaNowStatus.textContent = "Agenda livre";
+    el.agendaNextBooking.classList.remove("has-booking");
+    el.agendaNextBooking.classList.add("is-empty");
     el.agendaNextBooking.innerHTML = empty("Sem próximo atendimento", "Não há atendimento ativo neste dia.");
     return;
   }
@@ -1558,6 +1560,8 @@ function renderAgendaNextBooking(rows) {
   );
 
   el.agendaNowStatus.textContent = paid ? "Sinal pago" : "Aguardando Pix";
+  el.agendaNextBooking.classList.remove("is-empty");
+  el.agendaNextBooking.classList.add("has-booking");
   el.agendaNextBooking.innerHTML = `
     <div class="agenda-next-time">${timeOf(new Date(next.start_at))}</div>
     <div class="agenda-next-main">

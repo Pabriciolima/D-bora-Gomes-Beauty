@@ -2412,3 +2412,675 @@ body.menu-lock{
     font-size:15px;
   }
 }
+
+
+/* ==========================================================
+   PATCH MOBILE 14/08/2026
+   CORREÇÕES:
+   1) Cards públicos de serviços e imagens
+   2) Agenda "quem está na vez"
+   3) Menu hamburger perfeitamente centralizado
+   ========================================================== */
+
+@media (max-width: 900px) {
+
+  /* ----------------------------------------------------------
+     HEADER / HAMBURGER
+     ---------------------------------------------------------- */
+
+  .topbar{
+    display:grid !important;
+    grid-template-columns:52px minmax(0,1fr) 52px !important;
+    align-items:center !important;
+    min-height:72px !important;
+    padding:
+      calc(8px + env(safe-area-inset-top))
+      12px
+      8px !important;
+  }
+
+  .topbar-left{
+    display:contents !important;
+  }
+
+  .topbar-left > div:last-child{
+    grid-column:2 !important;
+    min-width:0 !important;
+    text-align:left !important;
+  }
+
+  .topbar-right{
+    grid-column:3 !important;
+    justify-self:end !important;
+  }
+
+  .menu-btn{
+    grid-column:1 !important;
+    display:flex !important;
+    width:46px !important;
+    height:46px !important;
+    min-width:46px !important;
+    min-height:46px !important;
+    padding:0 !important;
+    margin:0 !important;
+    align-items:center !important;
+    justify-content:center !important;
+    flex-direction:column !important;
+    gap:5px !important;
+    justify-self:start !important;
+    border:1px solid #eddde2 !important;
+    border-radius:15px !important;
+    background:#fffafb !important;
+    box-shadow:0 8px 20px rgba(71,41,49,.05) !important;
+  }
+
+  .menu-btn span{
+    display:block !important;
+    width:20px !important;
+    height:2px !important;
+    margin:0 !important;
+    border-radius:99px !important;
+    background:#4c343b !important;
+    transform:none !important;
+  }
+
+  .topbar h1{
+    margin:0 !important;
+    font-size:21px !important;
+    line-height:1.05 !important;
+  }
+
+  .topbar .eyebrow{
+    display:none !important;
+  }
+
+  .topbar-avatar-btn{
+    width:44px !important;
+    height:44px !important;
+    min-width:44px !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     SERVIÇOS PÚBLICOS
+     MOBILE = UM CARD POR VEZ, SEM CARROSSEL APERTADO
+     ---------------------------------------------------------- */
+
+  .public-service-grid,
+  #public-services-grid{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:14px !important;
+    width:100% !important;
+    overflow:visible !important;
+    padding:0 !important;
+    scroll-snap-type:none !important;
+  }
+
+  .public-service-grid .service-card,
+  #public-services-grid .service-card{
+    position:relative !important;
+    display:flex !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+    min-height:0 !important;
+    flex:initial !important;
+    overflow:hidden !important;
+    padding:0 !important;
+    border:1px solid #efdee3 !important;
+    border-radius:22px !important;
+    background:#fff !important;
+    box-shadow:0 12px 30px rgba(73,42,50,.07) !important;
+    scroll-snap-align:none !important;
+  }
+
+  .public-service-grid .service-card.featured,
+  #public-services-grid .service-card.featured{
+    border-color:#e9c5cf !important;
+  }
+
+  .public-service-grid .service-featured-badge,
+  #public-services-grid .service-featured-badge{
+    position:absolute !important;
+    z-index:5 !important;
+    top:12px !important;
+    right:12px !important;
+    margin:0 !important;
+    padding:7px 9px !important;
+    border-radius:999px !important;
+    background:#4b3038 !important;
+    color:#fff !important;
+    font-size:7px !important;
+    font-weight:900 !important;
+    letter-spacing:.03em !important;
+    text-transform:uppercase !important;
+  }
+
+  /* Foto sempre no topo e ocupando a largura inteira */
+  .public-service-grid .service-cover,
+  #public-services-grid .service-cover{
+    position:relative !important;
+    order:0 !important;
+    width:100% !important;
+    height:auto !important;
+    aspect-ratio:16 / 9 !important;
+    margin:0 !important;
+    border-radius:0 !important;
+    overflow:hidden !important;
+    background:
+      linear-gradient(145deg,#fae8ed,#f7dce4) !important;
+  }
+
+  .public-service-grid .service-cover img,
+  #public-services-grid .service-cover img{
+    display:block !important;
+    width:100% !important;
+    height:100% !important;
+    object-fit:cover !important;
+    object-position:center !important;
+  }
+
+  .public-service-grid .service-cover-placeholder,
+  #public-services-grid .service-cover-placeholder{
+    display:grid !important;
+    place-items:center !important;
+    min-height:0 !important;
+    color:#bd4e68 !important;
+    font-size:34px !important;
+  }
+
+  /* Ícone e disponibilidade passam a formar uma faixa abaixo da foto */
+  .public-service-grid .service-head,
+  #public-services-grid .service-head{
+    order:1 !important;
+    display:flex !important;
+    width:100% !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    gap:10px !important;
+    margin:0 !important;
+    padding:12px 14px 0 !important;
+  }
+
+  .public-service-grid .service-icon,
+  #public-services-grid .service-icon{
+    position:static !important;
+    display:grid !important;
+    width:38px !important;
+    height:38px !important;
+    min-width:38px !important;
+    place-items:center !important;
+    border-radius:12px !important;
+    background:#fff0f4 !important;
+    color:#bd4e68 !important;
+    box-shadow:none !important;
+  }
+
+  .public-service-grid .service-status,
+  #public-services-grid .service-status{
+    position:static !important;
+    margin-left:auto !important;
+    padding:6px 9px !important;
+    border-radius:999px !important;
+    background:#ecf8f0 !important;
+    color:#28784d !important;
+    font-size:7px !important;
+    font-weight:900 !important;
+  }
+
+  .public-service-grid .service-card h3,
+  #public-services-grid .service-card h3{
+    order:2 !important;
+    margin:11px 14px 0 !important;
+    font-family:"Playfair Display",serif !important;
+    font-size:23px !important;
+    line-height:1.04 !important;
+  }
+
+  .public-service-grid .service-card > p,
+  #public-services-grid .service-card > p{
+    order:3 !important;
+    min-height:0 !important;
+    margin:6px 14px 0 !important;
+    color:#8b7279 !important;
+    font-size:10px !important;
+    line-height:1.45 !important;
+    display:-webkit-box !important;
+    -webkit-line-clamp:2 !important;
+    -webkit-box-orient:vertical !important;
+    overflow:hidden !important;
+  }
+
+  .public-service-grid .service-meta,
+  #public-services-grid .service-meta{
+    order:4 !important;
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:8px !important;
+    width:auto !important;
+    margin:12px 14px 0 !important;
+    padding-top:10px !important;
+    border-top:1px solid #f1e4e8 !important;
+  }
+
+  .public-service-grid .service-meta + .service-meta,
+  #public-services-grid .service-meta + .service-meta{
+    order:5 !important;
+    grid-template-columns:1fr !important;
+    margin-top:7px !important;
+    padding-top:0 !important;
+    border-top:0 !important;
+  }
+
+  .public-service-grid .service-meta > div,
+  #public-services-grid .service-meta > div{
+    min-width:0 !important;
+  }
+
+  .public-service-grid .service-meta span,
+  #public-services-grid .service-meta span{
+    display:block !important;
+    font-size:6px !important;
+    font-weight:900 !important;
+    text-transform:uppercase !important;
+    color:#9a7e85 !important;
+  }
+
+  .public-service-grid .service-meta strong,
+  #public-services-grid .service-meta strong{
+    display:block !important;
+    margin-top:3px !important;
+    font-size:11px !important;
+    color:#312126 !important;
+  }
+
+  .public-service-grid .service-card .service-cta,
+  .public-service-grid .service-card .btn,
+  #public-services-grid .service-card .service-cta,
+  #public-services-grid .service-card .btn{
+    order:6 !important;
+    width:auto !important;
+    min-height:50px !important;
+    margin:13px 14px 14px !important;
+    border-radius:14px !important;
+    font-size:10px !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     AGENDA: "QUEM ESTÁ NA VEZ?"
+     ---------------------------------------------------------- */
+
+  .agenda-now-card{
+    width:100% !important;
+    min-width:0 !important;
+    padding:15px !important;
+    overflow:hidden !important;
+    border-radius:22px !important;
+  }
+
+  .agenda-now-head{
+    display:flex !important;
+    width:100% !important;
+    align-items:flex-start !important;
+    justify-content:space-between !important;
+    gap:10px !important;
+  }
+
+  .agenda-now-head > div{
+    min-width:0 !important;
+  }
+
+  .agenda-now-head h3{
+    margin-top:5px !important;
+    font-size:24px !important;
+    line-height:1.05 !important;
+  }
+
+  .agenda-now-status{
+    flex:0 0 auto !important;
+    white-space:nowrap !important;
+  }
+
+  .agenda-next-booking{
+    display:block !important;
+    width:100% !important;
+    min-width:0 !important;
+    margin-top:12px !important;
+  }
+
+  /* Corrige o estado vazio que estava aparecendo como uma coluna fina */
+  .agenda-next-booking .empty-state,
+  .agenda-next-booking .empty,
+  .agenda-next-booking > div:only-child{
+    width:100% !important;
+    max-width:none !important;
+    min-width:0 !important;
+  }
+
+  .agenda-next-booking .empty-state,
+  .agenda-next-booking .empty{
+    display:flex !important;
+    min-height:100px !important;
+    flex-direction:column !important;
+    align-items:flex-start !important;
+    justify-content:center !important;
+    padding:16px !important;
+    border:1px dashed #ead7dd !important;
+    border-radius:16px !important;
+    background:#fffafb !important;
+    text-align:left !important;
+  }
+
+  .agenda-next-booking .empty-state strong,
+  .agenda-next-booking .empty strong{
+    font-family:"Playfair Display",serif !important;
+    font-size:19px !important;
+    line-height:1.1 !important;
+  }
+
+  .agenda-next-booking .empty-state small,
+  .agenda-next-booking .empty small,
+  .agenda-next-booking .empty-state p,
+  .agenda-next-booking .empty p{
+    margin-top:6px !important;
+    font-size:9px !important;
+    line-height:1.4 !important;
+    color:#927b82 !important;
+  }
+
+  /* Quando existe próximo atendimento */
+  .agenda-next-booking:not(:has(.empty-state)):not(:has(.empty)){
+    display:grid !important;
+    grid-template-columns:72px minmax(0,1fr) !important;
+    gap:12px !important;
+    align-items:center !important;
+  }
+
+  .agenda-next-time{
+    width:72px !important;
+    min-height:72px !important;
+    border-radius:16px !important;
+    font-size:22px !important;
+  }
+
+  .agenda-next-main{
+    min-width:0 !important;
+  }
+
+  .agenda-next-main strong{
+    font-size:18px !important;
+    line-height:1.05 !important;
+    white-space:normal !important;
+    overflow-wrap:anywhere !important;
+  }
+
+  .agenda-next-main span{
+    margin-top:4px !important;
+    font-size:9px !important;
+  }
+
+  .agenda-next-main small{
+    font-size:8px !important;
+  }
+
+  .agenda-next-finance{
+    grid-column:1 / -1 !important;
+    display:flex !important;
+    width:100% !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    gap:12px !important;
+    margin-top:2px !important;
+    padding:10px 12px !important;
+    border:1px solid #f0e0e5 !important;
+    border-radius:14px !important;
+    background:#fff8fa !important;
+    text-align:left !important;
+  }
+
+  .agenda-next-finance strong{
+    margin:0 !important;
+    font-size:19px !important;
+    white-space:nowrap !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     DIA SELECIONADO / TIMELINE
+     ---------------------------------------------------------- */
+
+  .agenda-list-panel,
+  .agenda-panel-card{
+    min-width:0 !important;
+    overflow:hidden !important;
+  }
+
+  .agenda-list-head{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:10px !important;
+  }
+
+  .agenda-list-head h3,
+  #agenda-list-title{
+    font-size:20px !important;
+    line-height:1.1 !important;
+    text-transform:capitalize !important;
+  }
+
+  .agenda-status-filter{
+    width:100% !important;
+    min-width:0 !important;
+  }
+
+  .agenda-timeline{
+    width:100% !important;
+    min-width:0 !important;
+  }
+
+  .agenda-timeline-item{
+    grid-template-columns:48px 12px minmax(0,1fr) !important;
+    width:100% !important;
+    min-width:0 !important;
+    gap:6px !important;
+  }
+
+  .agenda-time-column{
+    width:48px !important;
+    padding-top:17px !important;
+  }
+
+  .agenda-time-column strong{
+    font-size:16px !important;
+  }
+
+  .agenda-time-column span{
+    font-size:6px !important;
+  }
+
+  .agenda-timeline-card{
+    width:100% !important;
+    min-width:0 !important;
+    padding:12px !important;
+    overflow:hidden !important;
+  }
+
+  .agenda-timeline-top{
+    gap:6px !important;
+  }
+
+  .agenda-timeline-top > div{
+    min-width:0 !important;
+  }
+
+  .agenda-timeline-top h3{
+    font-size:16px !important;
+    line-height:1.05 !important;
+    overflow-wrap:anywhere !important;
+  }
+
+  .agenda-timeline-top p{
+    font-size:8px !important;
+    line-height:1.25 !important;
+  }
+
+  .agenda-timeline-meta{
+    display:flex !important;
+    flex-wrap:wrap !important;
+    gap:5px !important;
+  }
+
+  .agenda-timeline-meta > span{
+    min-height:24px !important;
+    max-width:100% !important;
+    padding:0 7px !important;
+    font-size:6.5px !important;
+    white-space:normal !important;
+  }
+
+  .agenda-timeline-bottom{
+    min-width:0 !important;
+  }
+
+  .agenda-timeline-bottom small{
+    max-width:55% !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     MELHOR USO DA LARGURA DISPONÍVEL
+     ---------------------------------------------------------- */
+
+  #page-agenda,
+  #page-services{
+    width:100% !important;
+    max-width:none !important;
+    min-width:0 !important;
+  }
+
+  .content-shell > .page,
+  .page{
+    min-width:0 !important;
+  }
+}
+
+
+/* iPhone / celulares estreitos */
+@media (max-width: 430px){
+
+  .public-service-grid,
+  #public-services-grid{
+    gap:12px !important;
+  }
+
+  .public-service-grid .service-cover,
+  #public-services-grid .service-cover{
+    aspect-ratio:1.55 / 1 !important;
+  }
+
+  .public-service-grid .service-card h3,
+  #public-services-grid .service-card h3{
+    font-size:21px !important;
+  }
+
+  .agenda-now-head h3{
+    font-size:22px !important;
+  }
+
+  .agenda-next-booking:not(:has(.empty-state)):not(:has(.empty)){
+    grid-template-columns:64px minmax(0,1fr) !important;
+  }
+
+  .agenda-next-time{
+    width:64px !important;
+    min-height:64px !important;
+    font-size:20px !important;
+  }
+}
+
+
+/* ==========================================================
+   PATCH FINAL TESTADO — MOBILE SERVICES + AGENDA + HAMBURGER
+   ========================================================== */
+@media (max-width: 900px) {
+  /* HAMBURGER: não depende do layout interno do topbar */
+  .topbar{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important}
+  .topbar-left{display:flex!important;align-items:center!important;gap:11px!important;min-width:0!important}
+  .topbar-left>div:last-child{min-width:0!important}
+  .menu-btn{
+    display:flex!important;flex:0 0 46px!important;width:46px!important;height:46px!important;
+    min-width:46px!important;min-height:46px!important;padding:0!important;margin:0!important;
+    flex-direction:column!important;align-items:center!important;justify-content:center!important;
+    gap:4px!important;border:1px solid #eddde2!important;border-radius:15px!important;
+    background:#fffafb!important;box-shadow:0 8px 20px rgba(71,41,49,.05)!important;
+  }
+  .menu-btn span{display:block!important;width:19px!important;height:2px!important;margin:0!important;border-radius:99px!important;background:#4c343b!important}
+  .topbar-right{display:flex!important;align-items:center!important;margin-left:auto!important}
+
+  /* SERVIÇOS PÚBLICOS: um card por linha e fluxo vertical obrigatório */
+  #public-services-grid.service-grid,
+  #public-services-grid,
+  .public-service-grid{
+    display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:14px!important;
+    width:100%!important;max-width:100%!important;overflow:visible!important;padding:0!important;
+  }
+  #public-services-grid .service-card,
+  .public-service-grid .service-card{
+    display:flex!important;flex-direction:column!important;align-items:stretch!important;
+    width:100%!important;max-width:100%!important;min-width:0!important;min-height:0!important;
+    flex:none!important;padding:0!important;overflow:hidden!important;border-radius:22px!important;
+    scroll-snap-align:none!important;
+  }
+  #public-services-grid .service-cover,
+  .public-service-grid .service-cover{
+    order:0!important;display:block!important;position:relative!important;
+    width:100%!important;height:auto!important;aspect-ratio:16/9!important;
+    flex:0 0 auto!important;margin:0!important;border-radius:0!important;overflow:hidden!important;
+  }
+  #public-services-grid .service-cover img,
+  .public-service-grid .service-cover img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important}
+  #public-services-grid .service-cover-placeholder,
+  .public-service-grid .service-cover-placeholder{display:grid!important;place-items:center!important;min-height:190px!important;background:linear-gradient(145deg,#fff0f4,#f8dde4)!important}
+  #public-services-grid .service-head,
+  .public-service-grid .service-head{order:1!important;display:flex!important;align-items:center!important;justify-content:space-between!important;width:100%!important;padding:12px 14px 0!important;margin:0!important}
+  #public-services-grid .service-card h3,
+  .public-service-grid .service-card h3{order:2!important;margin:10px 14px 0!important;font-size:22px!important;line-height:1.06!important}
+  #public-services-grid .service-card>p,
+  .public-service-grid .service-card>p{order:3!important;flex:none!important;min-height:0!important;margin:6px 14px 0!important;font-size:10px!important;line-height:1.45!important}
+  #public-services-grid .service-meta,
+  .public-service-grid .service-meta{order:4!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;width:auto!important;margin:12px 14px 0!important;padding-top:10px!important}
+  #public-services-grid .service-meta+.service-meta,
+  .public-service-grid .service-meta+.service-meta{order:5!important;grid-template-columns:1fr!important;margin-top:7px!important;padding-top:0!important;border-top:0!important}
+  #public-services-grid .service-cta,
+  .public-service-grid .service-cta{order:6!important;width:auto!important;min-height:50px!important;margin:13px 14px 14px!important}
+  #public-services-grid .service-featured-badge,
+  .public-service-grid .service-featured-badge{z-index:4!important}
+
+  /* AGENDA: estado vazio e próximo atendimento com classes explícitas do JS */
+  .agenda-now-card{display:block!important;width:100%!important;min-width:0!important;overflow:hidden!important}
+  .agenda-next-booking{width:100%!important;max-width:100%!important;min-width:0!important;margin-top:12px!important}
+  .agenda-next-booking.is-empty{display:block!important}
+  .agenda-next-booking.is-empty>.empty-state{
+    display:flex!important;width:100%!important;max-width:100%!important;min-width:0!important;
+    min-height:104px!important;flex-direction:column!important;align-items:flex-start!important;
+    justify-content:center!important;padding:16px!important;border-radius:16px!important;text-align:left!important;
+  }
+  .agenda-next-booking.has-booking{
+    display:grid!important;grid-template-columns:72px minmax(0,1fr)!important;
+    align-items:center!important;gap:12px!important;
+  }
+  .agenda-next-booking.has-booking .agenda-next-finance{
+    grid-column:1/-1!important;width:100%!important;display:flex!important;align-items:center!important;
+    justify-content:space-between!important;text-align:left!important;
+  }
+  .agenda-app-shell,.agenda-app-grid,.agenda-list-panel,.agenda-timeline,.agenda-timeline-card{min-width:0!important;max-width:100%!important}
+}
+@media (max-width:430px){
+  #public-services-grid .service-cover,.public-service-grid .service-cover{aspect-ratio:1.55/1!important}
+  .agenda-next-booking.has-booking{grid-template-columns:64px minmax(0,1fr)!important}
+}
