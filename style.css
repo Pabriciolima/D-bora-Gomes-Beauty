@@ -3456,55 +3456,164 @@ body.menu-lock{
 
 
 /* ==========================================================
-   AGENDA — CANCELAR ATENDIMENTO CONFIRMADO
+   MOBILE — FOOTER / ÁREA VAZIA ABAIXO DO CONTEÚDO
+   Corrige Safari/Chrome mobile com viewport dinâmica.
+   ========================================================== */
+@media (max-width: 900px){
+
+  html,
+  body{
+    min-height:100%;
+  }
+
+  body{
+    min-height:100dvh;
+    overflow-x:hidden;
+    overscroll-behavior-y:auto;
+  }
+
+  .public-view{
+    display:flex!important;
+    min-height:100dvh!important;
+    height:auto!important;
+    flex-direction:column!important;
+    overflow-x:hidden!important;
+  }
+
+  /* O fluxo ocupa somente o espaço necessário.
+     Quando a tela é curta, o footer encosta no final da viewport
+     em vez de ficar uma enorme área vazia DEPOIS dele. */
+  .booking-flow-card{
+    flex:0 0 auto!important;
+  }
+
+  .public-footer{
+    flex:0 0 auto!important;
+    width:100%!important;
+    margin-top:auto!important;
+    padding:
+      18px
+      16px
+      calc(18px + env(safe-area-inset-bottom))
+      !important;
+  }
+
+  /* Somente na etapa inicial existe o CTA flutuante.
+     Aqui reservamos espaço para ele sem sobrepor o footer. */
+  .public-view[data-public-step="1"] .public-footer{
+    padding-bottom:
+      calc(82px + env(safe-area-inset-bottom))
+      !important;
+  }
+
+  /* Nas etapas de horário, dados, Pix e sucesso
+     o CTA já está oculto: não reservar 90px desnecessários. */
+  .public-view[data-public-step="2"] .public-footer,
+  .public-view[data-public-step="3"] .public-footer,
+  .public-view[data-public-step="4"] .public-footer,
+  .public-view[data-public-step="success"] .public-footer{
+    padding-bottom:
+      calc(18px + env(safe-area-inset-bottom))
+      !important;
+  }
+
+  /* Impede margens finais de criarem uma segunda faixa vazia. */
+  .public-view > :last-child{
+    margin-bottom:0!important;
+  }
+}
+
+/* Fallback para navegadores antigos que ainda não entendem dvh. */
+@supports not (height: 100dvh){
+  @media (max-width: 900px){
+    body,
+    .public-view{
+      min-height:100vh!important;
+    }
+  }
+}
+/* ==========================================================
+   PATCH MOBILE — CORREÇÃO DA ÁREA VAZIA ABAIXO DO FOOTER
+   Cole ESTE BLOCO NO FINAL do seu style.css atual.
    ========================================================== */
 
-.agenda-timeline-actions{
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  gap:8px;
-  flex-wrap:wrap;
-}
+@media (max-width: 900px){
 
-.agenda-cancel-booking-btn{
-  min-height:32px;
-  padding:0 12px;
-  border:1px solid #efcfd7;
-  border-radius:999px;
-  background:#fff7f9;
-  color:#b24c65;
-  font:800 8px/1 Inter,system-ui,sans-serif;
-  cursor:pointer;
-  transition:.2s ease;
-}
-
-.agenda-cancel-booking-btn:hover{
-  border-color:#d86a83;
-  background:#fff0f4;
-  transform:translateY(-1px);
-}
-
-.agenda-cancel-booking-btn:disabled{
-  opacity:.55;
-  cursor:wait;
-  transform:none;
-}
-
-@media(max-width:600px){
-  .agenda-timeline-bottom{
-    align-items:flex-start!important;
-    gap:8px!important;
+  html,
+  body{
+    min-height:100%;
+    margin-bottom:0!important;
   }
 
-  .agenda-timeline-actions{
-    width:100%;
-    justify-content:space-between;
+  body{
+    min-height:100dvh!important;
+    overflow-x:hidden!important;
   }
 
-  .agenda-cancel-booking-btn{
-    min-height:34px;
-    padding:0 10px;
-    font-size:7px;
+  /* A tela pública passa a ocupar exatamente a altura útil
+     quando o conteúdo é curto, sem criar uma faixa enorme
+     depois do footer. */
+  .public-view{
+    display:flex!important;
+    min-height:100dvh!important;
+    height:auto!important;
+    flex-direction:column!important;
+    overflow-x:hidden!important;
+    padding-bottom:0!important;
+    margin-bottom:0!important;
+  }
+
+  /* O footer encosta no fim da viewport quando a página é curta. */
+  .public-footer{
+    flex:0 0 auto!important;
+    width:100%!important;
+    margin-top:auto!important;
+    margin-bottom:0!important;
+    padding:
+      16px
+      16px
+      calc(16px + env(safe-area-inset-bottom))
+      !important;
+  }
+
+  /* O botão flutuante "Agendar agora" só existe de fato na etapa 1.
+     Só nessa etapa reservamos espaço inferior maior. */
+  .public-view[data-public-step="1"] .public-footer{
+    padding-bottom:
+      calc(78px + env(safe-area-inset-bottom))
+      !important;
+  }
+
+  /* Horário, dados, Pix e confirmação:
+     não manter espaço do CTA que já está escondido. */
+  .public-view[data-public-step="2"] .public-footer,
+  .public-view[data-public-step="3"] .public-footer,
+  .public-view[data-public-step="4"] .public-footer{
+    padding-bottom:
+      calc(16px + env(safe-area-inset-bottom))
+      !important;
+  }
+
+  /* A tela de sucesso chama updateProgress(4),
+     portanto também usa footer compacto. */
+  #public-step-success:not(.hidden) ~ .public-footer,
+  .public-view:has(#public-step-success:not(.hidden)) .public-footer{
+    padding-bottom:
+      calc(16px + env(safe-area-inset-bottom))
+      !important;
+  }
+
+  .public-view > :last-child{
+    margin-bottom:0!important;
+  }
+}
+
+/* Fallback para navegadores que ainda não suportam dvh. */
+@supports not (height: 100dvh){
+  @media (max-width: 900px){
+    body,
+    .public-view{
+      min-height:100vh!important;
+    }
   }
 }

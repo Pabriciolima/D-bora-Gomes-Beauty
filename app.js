@@ -361,6 +361,10 @@ async function init() {
   bindEvents();
   setDateDefaults();
 
+  if (el.publicView && !el.publicView.dataset.publicStep) {
+    el.publicView.dataset.publicStep = "1";
+  }
+
   try {
     state.business = await fetchBusiness();
 
@@ -1209,9 +1213,17 @@ function startPaymentPolling() {
     const approval = String(status.admin_approval_status || "pending").toLowerCase();
     const clientDecision = String(status.client_decision || "").toLowerCase();
 
+    console.debug("Status público do agendamento:", {
+      appointment_status: status.appointment_status,
+      payment_status: status.payment_status,
+      admin_approval_status: approval,
+      client_decision: clientDecision
+    });
+
     // O servidor sempre tem prioridade sobre uma confirmação antiga.
     // Isso é essencial quando um atendimento já confirmado é cancelado depois.
     if (
+      status.appointment_status === "cancelled" ||
       clientDecision === "blocked" ||
       clientDecision === "declined" ||
       ["rejected", "refunded"].includes(approval)
@@ -1584,6 +1596,12 @@ function updateProgress(step) {
   $$("[data-progress]").forEach(item => {
     item.classList.toggle("active", Number(item.dataset.progress) <= Number(step));
   });
+
+  // Informa ao CSS qual etapa pública está visível.
+  // Usado apenas para ajustar corretamente o espaço do footer no mobile.
+  if (el.publicView) {
+    el.publicView.dataset.publicStep = String(step);
+  }
 
   if (el.mobileQuickBook) {
     el.mobileQuickBook.classList.toggle("hidden-by-flow", Number(step) !== 1);
@@ -2571,12 +2589,21 @@ async function rejectCurrentApproval() {
     if (!data?.success) throw new Error(data?.error || "Não foi possível estornar o pagamento.");
 
     closeApprovalModal();
-    toast(
-      shouldBlock
-        ? "Atendimento recusado e estorno solicitado. A cliente recebeu uma mensagem discreta na tela."
-        : "Atendimento recusado e estorno solicitado. A cliente já foi avisada na tela.",
-      "success"
-    );
+
+    if (data.refundPending) {
+      toast(
+        data.warning ||
+        "Atendimento recusado e cliente avisada. O estorno precisa ser revisado no Asaas.",
+        "warning"
+      );
+    } else {
+      toast(
+        shouldBlock
+          ? "Atendimento recusado, cliente avisada e estorno realizado. O bloqueio também foi aplicado."
+          : "Atendimento recusado. A cliente já recebeu a mensagem e o estorno foi realizado.",
+        "success"
+      );
+    }
 
     await loadAdminData();
     renderAdmin();
@@ -2660,12 +2687,20 @@ async function cancelConfirmedBooking(appointmentId) {
       );
     }
 
-    toast(
-      shouldBlock
-        ? "Agendamento cancelado, estorno solicitado e cliente bloqueada."
-        : "Agendamento cancelado e estorno solicitado. A cliente já pode receber a atualização.",
-      "success"
-    );
+    if (data.refundPending) {
+      toast(
+        data.warning ||
+        "Agendamento cancelado e cliente avisada. O estorno precisa ser revisado no Asaas.",
+        "warning"
+      );
+    } else {
+      toast(
+        shouldBlock
+          ? "Agendamento cancelado, cliente avisada, estorno realizado e bloqueio aplicado."
+          : "Agendamento cancelado. A cliente já recebeu a mensagem e o estorno foi realizado.",
+        "success"
+      );
+    }
 
     await loadAdminData();
     renderAdmin();
