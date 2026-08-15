@@ -361,10 +361,6 @@ async function init() {
   bindEvents();
   setDateDefaults();
 
-  if (el.publicView && !el.publicView.dataset.publicStep) {
-    el.publicView.dataset.publicStep = "1";
-  }
-
   try {
     state.business = await fetchBusiness();
 
@@ -473,10 +469,27 @@ function bindEvents() {
   el.copyPixBtn.addEventListener("click", copyPix);
   el.newPublicBookingBtn.addEventListener("click", resetPublicBooking);
 
-  $$("[data-page]").forEach(btn => btn.addEventListener("click", () => navigateAdmin(btn.dataset.page)));
-  el.menuBtn.addEventListener("click", openSidebar);
-  el.sidebarOverlay.addEventListener("click", closeSidebar);
-  el.logoutBtn.addEventListener("click", adminLogout);
+  $$("[data-page]").forEach(btn => {
+    btn.addEventListener("click", () => navigateAdmin(btn.dataset.page));
+  });
+
+  el.menuBtn?.addEventListener("click", openSidebar);
+  el.sidebarOverlay?.addEventListener("click", closeSidebar);
+  el.logoutBtn?.addEventListener("click", adminLogout);
+
+  // Segurança de navegação mobile:
+  // fecha drawer ao mudar orientação/tamanho e com ESC.
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 900) closeSidebar();
+  });
+
+  window.addEventListener("orientationchange", () => {
+    window.setTimeout(closeSidebar, 80);
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") closeSidebar();
+  });
   el.blockPeriodForm?.addEventListener("submit", createBlockedPeriod);
   el.approvalAcceptBtn?.addEventListener("click", acceptCurrentApproval);
   el.approvalRejectBtn?.addEventListener("click", rejectCurrentApproval);
@@ -1597,12 +1610,6 @@ function updateProgress(step) {
     item.classList.toggle("active", Number(item.dataset.progress) <= Number(step));
   });
 
-  // Informa ao CSS qual etapa pública está visível.
-  // Usado apenas para ajustar corretamente o espaço do footer no mobile.
-  if (el.publicView) {
-    el.publicView.dataset.publicStep = String(step);
-  }
-
   if (el.mobileQuickBook) {
     el.mobileQuickBook.classList.toggle("hidden-by-flow", Number(step) !== 1);
   }
@@ -1737,6 +1744,12 @@ async function tryLoadAdmin(user) {
 }
 
 async function openAdminPanel() {
+  // Garante que nenhum overlay/menu da área pública continue
+  // por cima do painel administrativo no celular.
+  closePublicMenu();
+  document.body.classList.remove("menu-lock", "admin-menu-open");
+  closeSidebar();
+
   await loadAdminData();
 
   renderAdmin();
@@ -1747,6 +1760,13 @@ async function openAdminPanel() {
   navigateAdmin("dashboard");
   renderAdminServices();
   startAdminApprovalPolling();
+
+  // No mobile, entra sempre no topo do painel.
+  if (window.innerWidth <= 900) {
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    });
+  }
 }
 
 async function loadAdminData() {
@@ -3084,10 +3104,15 @@ function closeConfirmModal(result) {
 
 function navigateAdmin(page) {
   $$(".page").forEach(p => p.classList.add("hidden"));
-  $$("[data-page]").forEach(btn => btn.classList.toggle("active", btn.dataset.page === page));
+  $$("[data-page]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.page === page);
+  });
 
   const target = $(`#page-${page}`);
-  if (!target) return;
+  if (!target) {
+    console.warn("Página administrativa não encontrada:", page);
+    return;
+  }
 
   target.classList.remove("hidden");
   closeSidebar();
@@ -3101,7 +3126,16 @@ function navigateAdmin(page) {
     account: "Conta e segurança"
   };
 
-  el.pageTitle.textContent = titles[page] || "Débora Gomes Beauty";
+  if (el.pageTitle) {
+    el.pageTitle.textContent = titles[page] || "Débora Gomes Beauty";
+  }
+
+  // Evita que a nova página abra no meio da rolagem anterior no mobile.
+  if (window.innerWidth <= 900) {
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    });
+  }
 }
 
 async function updateAdminCredentials(event) {
@@ -3229,13 +3263,19 @@ async function adminLogout() {
 }
 
 function openSidebar() {
+  if (!el.sidebar || !el.sidebarOverlay) return;
+
   el.sidebar.classList.add("open");
   el.sidebarOverlay.classList.add("visible");
+  document.body.classList.add("admin-menu-open");
+  el.menuBtn?.setAttribute("aria-expanded", "true");
 }
 
 function closeSidebar() {
-  el.sidebar.classList.remove("open");
-  el.sidebarOverlay.classList.remove("visible");
+  el.sidebar?.classList.remove("open");
+  el.sidebarOverlay?.classList.remove("visible");
+  document.body.classList.remove("admin-menu-open");
+  el.menuBtn?.setAttribute("aria-expanded", "false");
 }
 
 /* HELPERS */

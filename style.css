@@ -3617,3 +3617,192 @@ body.menu-lock{
     }
   }
 }
+
+
+/* ==========================================================
+   PATCH DEFINITIVO — PAINEL ADM MOBILE FUNCIONAL
+   Cole NO FINAL do style.css.
+   Não altera o fluxo público.
+   ========================================================== */
+
+@media (max-width: 900px){
+
+  body.admin-menu-open{
+    overflow:hidden!important;
+    touch-action:none;
+  }
+
+  /* O painel precisa ocupar toda a largura no celular. */
+  #app-view.app-view:not(.hidden){
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:100dvh!important;
+    overflow-x:hidden!important;
+  }
+
+  #app-view .content-shell{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    margin-left:0!important;
+    padding-bottom:calc(82px + env(safe-area-inset-bottom))!important;
+    overflow-x:hidden!important;
+  }
+
+  #app-view .topbar{
+    position:sticky!important;
+    z-index:920!important;
+    top:0!important;
+    width:100%!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+
+  #app-view .menu-btn{
+    position:relative!important;
+    z-index:2!important;
+    pointer-events:auto!important;
+    touch-action:manipulation!important;
+  }
+
+  /* Drawer administrativo */
+  #app-view #sidebar.sidebar{
+    position:fixed!important;
+    z-index:1100!important;
+    top:0!important;
+    bottom:0!important;
+    left:0!important;
+    width:min(84vw,310px)!important;
+    height:100dvh!important;
+    max-height:100dvh!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+    transform:translate3d(-105%,0,0)!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+    will-change:transform!important;
+    transition:transform .24s ease, visibility .24s ease!important;
+  }
+
+  #app-view #sidebar.sidebar.open{
+    transform:translate3d(0,0,0)!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+  }
+
+  #app-view #sidebar-overlay.sidebar-overlay{
+    position:fixed!important;
+    z-index:1090!important;
+    inset:0!important;
+    display:block!important;
+    width:100vw!important;
+    height:100dvh!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    background:rgba(48,31,37,.34)!important;
+    opacity:0!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+    backdrop-filter:blur(4px)!important;
+    -webkit-backdrop-filter:blur(4px)!important;
+    transition:opacity .2s ease, visibility .2s ease!important;
+  }
+
+  #app-view #sidebar-overlay.sidebar-overlay.visible{
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+  }
+
+  /* Páginas e cards nunca podem ficar mais largos que o viewport. */
+  #app-view .page{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+    overflow-x:hidden!important;
+  }
+
+  #app-view .page > *,
+  #app-view .panel-card,
+  #app-view .admin-welcome-card,
+  #app-view .today-summary-strip,
+  #app-view .agenda-panel-card,
+  #app-view .account-grid,
+  #app-view .services-admin-header,
+  #app-view .admin-service-grid{
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+
+  /* Tabelas continuam roláveis sem estourar a página inteira. */
+  #app-view .table-wrap{
+    width:100%!important;
+    max-width:100%!important;
+    overflow-x:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+
+  /* Agenda mobile */
+  #app-view .agenda-layout,
+  #app-view .agenda-main-grid,
+  #app-view .agenda-toolbar,
+  #app-view .agenda-content-grid{
+    grid-template-columns:1fr!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+
+  /* Serviços e segurança mobile */
+  #app-view .admin-service-grid,
+  #app-view .account-grid,
+  #app-view .settings-grid{
+    grid-template-columns:1fr!important;
+  }
+
+  /* Navegação inferior administrativa */
+  #app-view .mobile-nav{
+    position:fixed!important;
+    z-index:1000!important;
+    right:7px!important;
+    bottom:max(7px,env(safe-area-inset-bottom))!important;
+    left:7px!important;
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    width:auto!important;
+    max-width:none!important;
+    pointer-events:auto!important;
+  }
+
+  #app-view .mobile-nav-item{
+    min-width:0!important;
+    pointer-events:auto!important;
+    touch-action:manipulation!important;
+  }
+
+  /* Modal acima de drawer/nav */
+  #app-view .modal-backdrop,
+  .modal-backdrop{
+    z-index:1400!important;
+  }
+}
+
+@media (max-width: 430px){
+  #app-view .page{
+    padding-left:10px!important;
+    padding-right:10px!important;
+  }
+
+  #app-view .mobile-nav{
+    right:5px!important;
+    left:5px!important;
+  }
+
+  #app-view .mobile-nav-item small{
+    font-size:7px!important;
+  }
+}
