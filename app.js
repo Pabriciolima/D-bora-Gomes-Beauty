@@ -215,7 +215,6 @@ const el = {
   pixQrWrap: $(".pix-qr-wrap"),
   pixSide: $(".pix-side"),
   pixValueCard: $(".pix-value-card"),
-  copyPixBtn: $("#copy-pix-btn"),
 
   successMessage: $("#success-message"),
   successReference: $("#success-reference"),
@@ -234,7 +233,6 @@ const el = {
 
   metricBookings: $("#metric-bookings"),
   metricClients: $("#metric-clients"),
-  metricServices: $("#metric-services"),
   metricRevenue: $("#metric-revenue"),
   metricTodayBookings: $("#metric-today-bookings"),
   metricTodayValue: $("#metric-today-value"),
@@ -249,12 +247,10 @@ const el = {
   dashboardTopClient: $("#dashboard-top-client"),
   dashboardTopService: $("#dashboard-top-service"),
   dashboardBookings: $("#dashboard-bookings"),
-  agendaDateFilter: $("#agenda-date-filter"),
   agendaStatusFilter: $("#agenda-status-filter"),
   adminBookings: $("#admin-bookings"),
   clientsTable: $("#clients-table"),
   adminServicesGrid: $("#admin-services-grid"),
-  addServiceBtn: $("#add-service-btn"),
   serviceEditorModal: $("#service-editor-modal"),
   closeServiceEditor: $("#close-service-editor"),
   serviceEditorForm: $("#service-editor-form"),
@@ -487,9 +483,6 @@ function bindEvents() {
     window.setTimeout(closeSidebar, 80);
   });
 
-  document.addEventListener("keydown", event => {
-    if (event.key === "Escape") closeSidebar();
-  });
   el.blockPeriodForm?.addEventListener("submit", createBlockedPeriod);
   el.approvalAcceptBtn?.addEventListener("click", acceptCurrentApproval);
   el.approvalRejectBtn?.addEventListener("click", rejectCurrentApproval);
@@ -501,7 +494,6 @@ function bindEvents() {
   el.confirmModalOk?.addEventListener("click", () => closeConfirmModal(true));
   el.accountSecurityForm?.addEventListener("submit", updateAdminCredentials);
   el.toggleAccountPassword?.addEventListener("click", toggleAccountPasswordVisibility);
-  el.agendaDateFilter?.addEventListener("change", renderAdminBookings);
   el.agendaStatusFilter?.addEventListener("change", renderAdminBookings);
   el.agendaPrevWeek?.addEventListener("click", () => shiftAgendaWeek(-7));
   el.agendaNextWeek?.addEventListener("click", () => shiftAgendaWeek(7));
@@ -522,7 +514,6 @@ function bindEvents() {
     renderPublicServices();
   });
 
-  el.addServiceBtn?.addEventListener("click", () => openServiceEditor());
   el.newServiceBtn?.addEventListener("click", () => openServiceEditor());
   el.closeServiceEditor?.addEventListener("click", closeServiceEditorModal);
   el.serviceEditorModal?.addEventListener("click", e => {
@@ -557,7 +548,6 @@ function setDateDefaults() {
   state.agendaSelectedDate = today;
   state.agendaWeekStart = startOfWeekISO(today);
 
-  if (el.agendaDateFilter) el.agendaDateFilter.value = today;
   if (el.blockDate) el.blockDate.value = today;
 }
 
@@ -1902,11 +1892,10 @@ function renderAdmin() {
 
   if (el.metricBookings) el.metricBookings.textContent = state.adminBookings.length;
   if (el.metricClients) el.metricClients.textContent = state.adminCustomers.length;
-  if (el.metricServices) el.metricServices.textContent = state.adminServices.length || state.services.length;
   if (el.metricRevenue) el.metricRevenue.textContent = money(totalReceived);
 
   if (el.metricTodayBookings) {
-    if (el.metricTodayBookings) el.metricTodayBookings.textContent =
+    el.metricTodayBookings.textContent =
       `${todayBookings.length} ${todayBookings.length === 1 ? "atendimento" : "atendimentos"}`;
   }
   if (el.metricTodayValue) el.metricTodayValue.textContent = money(todayValue);
@@ -1916,7 +1905,7 @@ function renderAdmin() {
   if (el.metricRevenueMonth) el.metricRevenueMonth.textContent = `${money(monthReceived)} neste mês`;
 
   if (el.adminDateLabel) {
-    if (el.adminDateLabel) el.adminDateLabel.textContent = new Intl.DateTimeFormat("pt-BR", {
+    el.adminDateLabel.textContent = new Intl.DateTimeFormat("pt-BR", {
       weekday: "long",
       day: "2-digit",
       month: "long",
@@ -1929,12 +1918,12 @@ function renderAdmin() {
 
   const ranking = buildClientRanking();
   if (el.dashboardTopClient) {
-    if (el.dashboardTopClient) el.dashboardTopClient.textContent = ranking[0]?.name || "—";
+    el.dashboardTopClient.textContent = ranking[0]?.name || "—";
   }
 
   const topService = buildServiceRanking()[0];
   if (el.dashboardTopService) {
-    if (el.dashboardTopService) el.dashboardTopService.textContent = topService?.name || "—";
+    el.dashboardTopService.textContent = topService?.name || "—";
   }
 
   renderDashboardBookings();
@@ -1975,7 +1964,7 @@ function renderDashboardBookings() {
 }
 
 function renderAdminBookings() {
-  const date = state.agendaSelectedDate || el.agendaDateFilter?.value || dateInput(new Date());
+  const date = state.agendaSelectedDate || dateInput(new Date());
   const status = el.agendaStatusFilter?.value || "all";
 
   const rows = state.adminBookings
@@ -2210,7 +2199,6 @@ function renderAgendaWeekStrip() {
   $$("[data-agenda-date]").forEach(btn => {
     btn.addEventListener("click", () => {
       state.agendaSelectedDate = btn.dataset.agendaDate;
-      if (el.agendaDateFilter) el.agendaDateFilter.value = state.agendaSelectedDate;
       if (el.blockDate) el.blockDate.value = state.agendaSelectedDate;
       renderAdminBookings();
     });
@@ -2221,7 +2209,6 @@ function shiftAgendaWeek(days) {
   const current = state.agendaWeekStart || startOfWeekISO(state.agendaSelectedDate || dateInput(new Date()));
   state.agendaWeekStart = addDaysISO(current, days);
   state.agendaSelectedDate = state.agendaWeekStart;
-  if (el.agendaDateFilter) el.agendaDateFilter.value = state.agendaSelectedDate;
   if (el.blockDate) el.blockDate.value = state.agendaSelectedDate;
   renderAdminBookings();
 }
@@ -2230,7 +2217,6 @@ function goAgendaToday() {
   const today = dateInput(new Date());
   state.agendaSelectedDate = today;
   state.agendaWeekStart = startOfWeekISO(today);
-  if (el.agendaDateFilter) el.agendaDateFilter.value = today;
   if (el.blockDate) el.blockDate.value = today;
   renderAdminBookings();
 }
@@ -2303,7 +2289,7 @@ function renderCustomers() {
 
   if (el.clientsTopName) el.clientsTopName.textContent = ranking[0]?.name || "—";
   if (el.clientsTopMeta) {
-    if (el.clientsTopMeta) el.clientsTopMeta.textContent = ranking[0]
+    el.clientsTopMeta.textContent = ranking[0]
       ? `${ranking[0].bookings} agendamentos • ${money(ranking[0].spent)} em sinais`
       : "Sem histórico ainda";
   }

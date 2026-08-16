@@ -3806,3 +3806,216 @@ body.menu-lock{
     font-size:7px!important;
   }
 }
+/* ==========================================================
+   CORREÇÃO CRÍTICA — NÃO MISTURAR CLIENTE + ADMIN NO MOBILE
+   COLE ESTE BLOCO NO ÚLTIMO LUGAR DO style.css
+   ========================================================== */
+
+/*
+  Motivo da correção:
+  o patch mobile anterior possui .public-view { display:flex!important; }.
+  Como ele aparece depois de .hidden { display:none!important; },
+  a tela pública continuava visível mesmo após o login administrativo.
+
+  Estas regras abaixo têm especificidade maior e ficam por último,
+  garantindo exclusividade entre as duas áreas.
+*/
+
+/* REGRA GLOBAL DE SEGURANÇA */
+#public-view.hidden,
+#app-view.hidden,
+.public-view.hidden,
+.app-view.hidden{
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+
+/* Quando a tela está ativa, volta ao comportamento correto. */
+#public-view:not(.hidden){
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+
+#app-view:not(.hidden){
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+
+/* ==========================================================
+   MOBILE
+   ========================================================== */
+@media (max-width:900px){
+
+  /* ÁREA DA CLIENTE:
+     nunca permanece ocupando espaço quando estiver escondida. */
+  body:has(#app-view:not(.hidden)) #public-view{
+    display:none!important;
+    visibility:hidden!important;
+    position:absolute!important;
+    width:0!important;
+    height:0!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    pointer-events:none!important;
+  }
+
+  /* ÁREA ADM:
+     torna-se a única tela da página depois do login. */
+  body:has(#app-view:not(.hidden)) #app-view{
+    display:block!important;
+    visibility:visible!important;
+    position:relative!important;
+    width:100%!important;
+    min-height:100dvh!important;
+    height:auto!important;
+    overflow-x:hidden!important;
+    pointer-events:auto!important;
+  }
+
+  /* Remove qualquer espaço herdado da experiência pública. */
+  body:has(#app-view:not(.hidden)){
+    min-height:100dvh!important;
+    padding-bottom:calc(82px + env(safe-area-inset-bottom))!important;
+    overflow-x:hidden!important;
+    background:#fffafc!important;
+  }
+
+  /* No modo ADM não existe footer/CTA da cliente. */
+  body:has(#app-view:not(.hidden)) .public-footer,
+  body:has(#app-view:not(.hidden)) #mobile-quick-book,
+  body:has(#app-view:not(.hidden)) #public-mobile-menu,
+  body:has(#app-view:not(.hidden)) #public-menu-overlay{
+    display:none!important;
+  }
+
+  /* Evita que algum overlay público invisível capture os toques. */
+  body:has(#app-view:not(.hidden)) #public-menu-overlay,
+  body:has(#app-view:not(.hidden)) #public-mobile-menu{
+    pointer-events:none!important;
+  }
+}
+
+/* Fallback para browsers sem :has().
+   A classe hidden continua sendo a fonte de verdade. */
+@supports not selector(body:has(*)){
+  #public-view.hidden{
+    display:none!important;
+  }
+
+  #app-view:not(.hidden){
+    display:block!important;
+  }
+}
+
+
+/* ==========================================================
+   AGENDA ADM — CANCELAMENTO PREMIUM
+   ========================================================== */
+#app-view .agenda-timeline-actions{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:flex-end;
+  gap:7px;
+}
+
+#app-view .agenda-cancel-booking-btn{
+  appearance:none;
+  -webkit-appearance:none;
+  display:inline-flex;
+  width:auto!important;
+  min-width:0!important;
+  max-width:max-content;
+  min-height:32px!important;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:0 12px!important;
+  border:1px solid #efd3dc!important;
+  border-radius:999px!important;
+  background:linear-gradient(180deg,#fff9fb,#fff2f6)!important;
+  color:#a34760!important;
+  font-family:"DM Sans",sans-serif!important;
+  font-size:9px!important;
+  font-weight:800!important;
+  line-height:1!important;
+  text-align:center;
+  white-space:nowrap;
+  box-shadow:0 5px 14px rgba(180,79,104,.08)!important;
+  cursor:pointer;
+  touch-action:manipulation;
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    background .16s ease,
+    color .16s ease,
+    box-shadow .16s ease;
+}
+
+#app-view .agenda-cancel-booking-btn::before{
+  content:"×";
+  display:grid;
+  width:17px;
+  height:17px;
+  flex:0 0 17px;
+  place-items:center;
+  border-radius:50%;
+  background:#f7dce4;
+  color:#a34760;
+  font-size:11px;
+  font-weight:900;
+  line-height:1;
+}
+
+#app-view .agenda-cancel-booking-btn:hover{
+  transform:translateY(-1px);
+  border-color:#e4b8c4!important;
+  background:#fce8ee!important;
+  color:#8f364e!important;
+  box-shadow:0 8px 18px rgba(180,79,104,.12)!important;
+}
+
+#app-view .agenda-cancel-booking-btn:active{
+  transform:translateY(0);
+}
+
+#app-view .agenda-cancel-booking-btn:focus-visible{
+  outline:none;
+  box-shadow:
+    0 0 0 3px rgba(216,111,135,.16),
+    0 5px 14px rgba(180,79,104,.08)!important;
+}
+
+#app-view .agenda-cancel-booking-btn:disabled{
+  opacity:.55;
+  cursor:wait;
+  transform:none;
+}
+
+@media(max-width:600px){
+  #app-view .agenda-timeline-bottom{
+    align-items:center!important;
+  }
+
+  #app-view .agenda-timeline-actions{
+    width:auto!important;
+    margin-left:auto!important;
+    gap:5px;
+  }
+
+  #app-view .agenda-cancel-booking-btn{
+    min-height:29px!important;
+    padding:0 9px!important;
+    gap:5px;
+    font-size:7.5px!important;
+    letter-spacing:.01em;
+  }
+
+  #app-view .agenda-cancel-booking-btn::before{
+    width:15px;
+    height:15px;
+    flex-basis:15px;
+    font-size:10px;
+  }
+}
