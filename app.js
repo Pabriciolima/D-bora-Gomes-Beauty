@@ -161,7 +161,11 @@ const state = {
   adminCustomers: [],
   adminPayments: [],
   adminServices: [],
-  editingServiceImageUrl: ""
+  editingServiceImageUrl: "",
+
+  // Evita disparos repetidos enquanto o polling roda a cada segundo.
+  // O servidor também possui idempotência própria.
+  whatsappNotificationKeys: new Set()
 };
 
 const $ = (s) => document.querySelector(s);
@@ -1049,6 +1053,83 @@ async function copyPix() {
 }
 
 
+
+async function sendBookingWhatsAppNotification(
+  eventType,
+  appointmentId,
+  accessToken = null
+) {
+  if (!eventType || !appointmentId) {
+    return {
+      success: false,
+      sent: false,
+      skipped: true,
+      error: "Evento ou agendamento ausente."
+    };
+  }
+
+  const key = `${eventType}:${appointmentId}`;
+
+  if (state.whatsappNotificationKeys?.has(key)) {
+    return {
+      success: true,
+      sent: false,
+      duplicate: true
+    };
+  }
+
+  state.whatsappNotificationKeys?.add(key);
+
+  try {
+    const { data, error } = await db.functions.invoke("whatsapp-notify", {
+      body: {
+        event: eventType,
+        appointmentId,
+        accessToken: accessToken || undefined
+      }
+    });
+
+    if (error) {
+      console.warn("WhatsApp notify:", error);
+      state.whatsappNotificationKeys?.delete(key);
+
+      return {
+        success: false,
+        sent: false,
+        retryable: true,
+        error: error.message
+      };
+    }
+
+    if (!data?.success && data?.retryable) {
+      state.whatsappNotificationKeys?.delete(key);
+    }
+
+    if (!data?.success) {
+      console.warn("WhatsApp não enviado:", data);
+    } else {
+      console.info("WhatsApp:", data);
+    }
+
+    return data || {
+      success: false,
+      sent: false,
+      error: "Resposta vazia da função WhatsApp."
+    };
+
+  } catch (error) {
+    console.warn("WhatsApp notify exception:", error);
+    state.whatsappNotificationKeys?.delete(key);
+
+    return {
+      success: false,
+      sent: false,
+      retryable: true,
+      error: error?.message || "Falha ao enviar WhatsApp."
+    };
+  }
+}
+
 function setPixPaymentVisualState(mode) {
   const step = $("#public-step-4");
   if (!step) return;
@@ -1281,6 +1362,14 @@ function startPaymentPolling() {
       status.payment_status === "received" &&
       approval === "pending"
     ) {
+      // Disparo idempotente: a cliente recebe uma única mensagem informando
+      // que o Pix foi identificado e aguarda aprovação da Débora.
+      sendBookingWhatsAppNotification(
+        "payment_received_pending",
+        state.guestHold?.appointment_id,
+        state.guestHold?.access_token
+      ).catch(error => console.warn("WhatsApp pagamento:", error));
+
       renderPaymentReceivedWaitingApproval();
       return;
     }
@@ -1525,6 +1614,9 @@ function resetPublicBooking() {
   state.selectedSlot = null;
   state.guestHold = null;
   state.pix = null;
+
+  // Um novo agendamento pode gerar uma nova sequência de notificações.
+  state.whatsappNotificationKeys = new Set();
 
   el.guestName.value = "";
   el.guestPhone.value = "";
@@ -2542,8 +2634,20 @@ async function acceptCurrentApproval() {
 
     if (error) throw error;
 
+    const whatsapp = await sendBookingWhatsAppNotification(
+      "appointment_confirmed",
+      booking.id
+    );
+
     closeApprovalModal();
-    toast("Atendimento confirmado. A cliente já recebeu a confirmação na tela.", "success");
+
+    toast(
+      whatsapp?.sent || whatsapp?.duplicate
+        ? "Atendimento confirmado. A confirmação também foi enviada pelo WhatsApp."
+        : "Atendimento confirmado. A tela da cliente foi atualizada; verifique a integração do WhatsApp.",
+      whatsapp?.sent || whatsapp?.duplicate ? "success" : "warning"
+    );
+
     await loadAdminData();
     renderAdmin();
 
@@ -2594,7 +2698,16 @@ async function rejectCurrentApproval() {
     if (error) throw error;
     if (!data?.success) throw new Error(data?.error || "Não foi possível estornar o pagamento.");
 
+    const whatsapp = await sendBookingWhatsAppNotification(
+      shouldBlock ? "appointment_blocked" : "appointment_declined",
+      booking.id
+    );
+
     closeApprovalModal();
+
+    if (!whatsapp?.success) {
+      console.warn("Atendimento recusado, mas o WhatsApp não foi enviado:", whatsapp);
+    }
 
     if (data.refundPending) {
       toast(
@@ -2691,6 +2804,15 @@ async function cancelConfirmedBooking(appointmentId) {
         data?.error ||
         "Não foi possível cancelar e estornar este agendamento."
       );
+    }
+
+    const whatsapp = await sendBookingWhatsAppNotification(
+      shouldBlock ? "appointment_blocked" : "appointment_cancelled",
+      appointmentId
+    );
+
+    if (!whatsapp?.success) {
+      console.warn("Agendamento cancelado, mas o WhatsApp não foi enviado:", whatsapp);
     }
 
     if (data.refundPending) {
